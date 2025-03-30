@@ -1,15 +1,16 @@
 # Papers Progress CLI
 
-The **Papers Progress CLI** is a command-line tool that helps you track your reading progress on academic papers. It reads an input YAML file (`papers.yml`) that contains your papers (and their related papers) and produces a flattened progress file (`papers_progress.yml`) where each paper is given a unique ID and its reading progress is tracked. You can update the status, list papers, download PDFs, and more—all using simple subcommands.
+The **Papers Progress CLI** is a command-line tool that helps you track your reading progress on academic papers. It reads an input YAML file (`papers.yml`) containing your papers (and their related papers) and produces a flattened progress file (`papers_progress.yml`) where each paper is assigned a unique ID and its reading progress is tracked. You can update the status, set the current page you're on, list papers, download PDFs, and more—all using simple subcommands.
 
 ## Features
 
 - **Flattened Paper List:** Related papers are included as separate entries.
 - **Unique IDs:** Each paper is assigned a unique numeric ID.
 - **Status Tracking:** Track papers with statuses:
-    - "not started" (alias: **ns**)
-    - "in progress" (alias: **ip**)
-    - "read" (alias: **d**)
+  - "not started" (alias: **ns**)
+  - "in progress" (alias: **ip**)
+  - "read" (alias: **d**)
+- **Current Page Tracking:** Record the current page you are at in a paper using the `--page` option.
 - **PDF Download:** Download the PDF of any paper using its URL.
 - **Easy CLI:** Update, list, and reset your paper progress via subcommands.
 
@@ -40,7 +41,7 @@ Run the CLI program from the command line. The tool supports the following subco
 
 ### 1. Initialization
 
-This command reads `papers.yml`, flattens the structure to include related papers as separate entries, assigns unique IDs, and initializes each paper’s progress to "not started."
+This command reads `papers.yml`, flattens the structure to include related papers as separate entries, assigns unique IDs, and initializes each paper’s progress to "not started" (with a cleared current page).
 
 ```bash
 python papers_cli.py init
@@ -50,13 +51,13 @@ If `papers_progress.yml` already exists, the command will notify you and leave i
 
 ### 2. Reset Progress
 
-Reset the progress for all papers back to "not started" and clear any start or finish dates.
+Reset the progress for all papers back to "not started" and clear any start date, finish date, and current page information.
 
 ```bash
 python papers_cli.py reset
 ```
 
-### 3. Setting a Paper's Status
+### 3. Setting a Paper's Status and Current Page
 
 Update the reading status of a paper by its unique ID. You can use full status names or their aliases:
 
@@ -64,39 +65,37 @@ Update the reading status of a paper by its unique ID. You can use full status n
 - **in progress** or **ip**
 - **read** or **d**
 
-You can also supply optional dates:
-- `--start_date YYYY-MM-DD` for starting a paper or marking it as in progress/read.
-- `--finished_date YYYY-MM-DD` for marking a paper as read.
+In addition, you can set the current page you're on by providing the `--page` option (an integer).
 
 Examples:
 
-Mark paper ID 3 as "in progress" using the alias `ip`:
+Mark paper ID 3 as "in progress" (alias `ip`), set the start date, and record that you are on page 42:
 ```bash
-python papers_cli.py set --id 3 --status ip --start_date 2025-03-30
+python papers_cli.py set --id 3 --status ip --start_date 2025-03-30 --page 42
 ```
 
-Mark paper ID 2 as "read" using the alias `d`:
+Mark paper ID 2 as "read" (alias `d`), with a finished date:
 ```bash
 python papers_cli.py set --id 2 --status d --finished_date 2025-03-30
 ```
 
 ### 4. Listing Papers
 
-List papers along with their progress details. You can optionally filter by status.
+List papers along with their progress details. The output will include the paper's ID, title, progress status, start date, finished date, and the current page (if set). You can optionally filter by status, using either the full status or its alias.
 
 List all papers:
 ```bash
 python papers_cli.py list
 ```
 
-List only papers that are "not started":
+List only papers that are "in progress" (alias `ip`):
 ```bash
-python papers_cli.py list --status "not started"
+python papers_cli.py list --status ip
 ```
 
 ### 5. Downloading PDFs
 
-Download the PDF for a paper using its unique ID. The tool will fetch the PDF from the paper's link and save it using a sanitized version of the paper’s title.
+Download the PDF for a paper using its unique ID. The CLI fetches the PDF from the paper's link and saves it using a sanitized version of the paper’s title as the filename.
 
 Example:
 ```bash
@@ -104,6 +103,27 @@ python papers_cli.py download --id 3
 ```
 
 If the paper has a valid URL, the PDF will be downloaded into the current directory.
+
+## Commands Overview
+
+- **init**:  
+  Initializes `papers_progress.yml` from `papers.yml`. It flattens the papers (including related papers), assigns unique IDs, and sets the default progress (with current page cleared).
+
+- **reset**:  
+  Resets the progress of every paper to "not started", clearing the start date, finish date, and current page.
+
+- **set**:  
+  Updates the status for a paper using its ID. Accepts optional parameters:
+  - `--start_date` for "in progress" or "read" statuses (defaults to today if not provided).
+  - `--finished_date` for "read" status (defaults to today if not provided).
+  - `--page` for the current page number.
+    Supports status aliases: `ns` (not started), `ip` (in progress), and `d` (read).
+
+- **list**:  
+  Lists the papers with all progress information, including current page. You can filter the list by status using either full names or aliases.
+
+- **download**:  
+  Downloads the PDF for a specified paper using its ID.
 
 ## YAML File Structure
 
@@ -135,11 +155,12 @@ Example snippet:
 
 After initialization, this file will contain a flattened list of all papers (including related papers) with additional fields:
 - `id`: Unique numeric identifier.
-- `progress`: A dictionary with:
-    - `status`: "not started", "in progress", or "read"
-    - `start_date`: Date when reading began.
-    - `finished_date`: Date when reading was completed.
-- For related papers, an optional `parent_title` field shows the title of the main paper.
+- **Paper Metadata:** Standard metadata from the original entry (and for related papers, an optional `parent_title`).
+- **Progress Dictionary:** Contains:
+  - `status`: "not started", "in progress", or "read"
+  - `start_date`: The date when reading began.
+  - `finished_date`: The date when reading was completed.
+  - `current_page`: The current page you are on (if set).
 
 ## Troubleshooting
 
@@ -152,3 +173,5 @@ After initialization, this file will contain a flattened list of all papers (inc
   Verify that `papers.yml` is in the same directory as `papers_cli.py`.
 - **Invalid Status:**  
   When using the `set` command, ensure you use one of the allowed statuses or their aliases: `not started`/`ns`, `in progress`/`ip`, or `read`/`d`.
+- **Invalid Page Number:**  
+  Ensure the value passed to `--page` is a valid integer.

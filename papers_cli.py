@@ -72,6 +72,7 @@ def load_papers():
                 "status": "not started",
                 "start_date": None,
                 "finished_date": None,
+                "current_page": None
             }
         save_papers(papers)
     return papers
@@ -97,6 +98,7 @@ def init_papers():
             "status": "not started",
             "start_date": None,
             "finished_date": None,
+            "current_page": None
         }
     save_papers(papers)
     print(f"Initialized {PROGRESS_FILE} from {PAPERS_FILE} with paper IDs (including related papers).")
@@ -104,6 +106,7 @@ def init_papers():
 def reset_papers():
     """
     Reset progress for all papers to default (not started).
+    Clears start_date, finished_date, and current_page.
     """
     papers = load_papers()
     for paper in papers:
@@ -111,16 +114,18 @@ def reset_papers():
             "status": "not started",
             "start_date": None,
             "finished_date": None,
+            "current_page": None
         }
     save_papers(papers)
     print("Reset progress for all papers.")
 
-def set_paper_status(paper_id, status, start_date=None, finished_date=None):
+def set_paper_status(paper_id, status, start_date=None, finished_date=None, current_page=None):
     """
     Set the progress status for a given paper by id.
     For 'in progress', a start_date is recorded (default: today).
     For 'read', a finished_date is recorded (default: today) and a start_date is set if not already.
     Supports aliases: 'ns' for not started, 'ip' for in progress, and 'd' for read.
+    Optionally, sets the current page the user is on.
     """
     # Convert aliases to full status strings if applicable
     status = STATUS_ALIASES.get(status.lower(), status).lower()
@@ -146,6 +151,13 @@ def set_paper_status(paper_id, status, start_date=None, finished_date=None):
             elif status == "not started":
                 paper["progress"]["start_date"] = None
                 paper["progress"]["finished_date"] = None
+
+            if current_page is not None:
+                try:
+                    paper["progress"]["current_page"] = int(current_page)
+                except ValueError:
+                    print("Current page must be an integer.")
+                    return
             break
 
     if not found:
@@ -158,9 +170,9 @@ def list_papers(status_filter=None):
     """
     List papers, optionally filtering by progress status.
     Supports aliases: 'ns' for not started, 'ip' for in progress, and 'd' for read.
+    Also displays the current page if set.
     """
     if status_filter:
-        # Convert alias to full status if applicable.
         status_filter = STATUS_ALIASES.get(status_filter.lower(), status_filter).lower()
     papers = load_papers()
     count = 0
@@ -176,6 +188,7 @@ def list_papers(status_filter=None):
         print(f"  Status: {status}")
         print(f"  Start Date: {paper.get('progress', {}).get('start_date')}")
         print(f"  Finished Date: {paper.get('progress', {}).get('finished_date')}")
+        print(f"  Current Page: {paper.get('progress', {}).get('current_page')}")
         print("-" * 60)
     if count == 0:
         print("No papers found with the specified filter.")
@@ -218,12 +231,13 @@ def main():
     # reset: Reset progress for all papers
     parser_reset = subparsers.add_parser("reset", help="Reset progress on all papers to 'not started'")
 
-    # set: Update the status of a paper by ID
+    # set: Update the status of a paper by ID (with optional current page)
     parser_set = subparsers.add_parser("set", help="Set the status for a paper by ID")
     parser_set.add_argument("--id", required=True, type=int, help="ID of the paper to update")
     parser_set.add_argument("--status", required=True, help="Status to set (not started/ns, in progress/ip, read/d)")
     parser_set.add_argument("--start_date", help="Optional start date (YYYY-MM-DD) for 'in progress' or 'read' statuses")
     parser_set.add_argument("--finished_date", help="Optional finished date (YYYY-MM-DD) for 'read' status")
+    parser_set.add_argument("--page", help="Optional current page number you are at", type=int)
 
     # list: View papers by progress status (optional filter)
     parser_list = subparsers.add_parser("list", help="List papers by progress status")
@@ -240,7 +254,7 @@ def main():
     elif args.command == "reset":
         reset_papers()
     elif args.command == "set":
-        set_paper_status(args.id, args.status, args.start_date, args.finished_date)
+        set_paper_status(args.id, args.status, args.start_date, args.finished_date, args.page)
     elif args.command == "list":
         list_papers(args.status)
     elif args.command == "download":
