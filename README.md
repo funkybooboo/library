@@ -222,6 +222,16 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * Deep Learning. [LeCun, Bengio, Hinton (2015)](https://www.cs.toronto.edu/~hinton/absps/NatureDeepReview.pdf).
     * Attention Is All You Need. [Vaswani et al (2017)](https://arxiv.org/pdf/1706.03762.pdf).
 
+1. **The Rust Programming Language. [Klabnik et al (2021)](https://rust-book.cs.brown.edu/title-page.html).**
+    \
+    <sub>Programming Languages</sub>
+
+1. **The Purely Functional Software Deployment Model. [Dolstra et al (2006)](https://edolstra.github.io/pubs/phd-thesis.pdf).**
+    \
+    <sub>Nixos</sub>
+    * Nix A Safe and Policy-Free System for Software Deployment. [Dolstra et al (2004)](https://edolstra.github.io/pubs/nspfssd-lisa2004-final.pdf).
+    * NixOS A Purely Functional Linux Distribution. [Dolstra et al (2010)](https://edolstra.github.io/pubs/nixos-jfp-final.pdf).
+
 
 
 </details>
@@ -253,6 +263,8 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. **Thinking Methodically about Performance. [Gregg (2012)](https://queue.acm.org/detail.cfm?id=2413037).**
 1. **Bitcoin, A peer-to-peer electronic cash system. [Nakamoto (2008)](https://bitcoin.org/bitcoin.pdf).**
 1. **A Few Useful Things to Know About Machine Learning. [Domingos (2012)](https://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf).**
+1. **The Rust Programming Language. [Klabnik et al (2021)](https://rust-book.cs.brown.edu/title-page.html).**
+1. **The Purely Functional Software Deployment Model. [Dolstra et al (2006)](https://edolstra.github.io/pubs/phd-thesis.pdf).**
 
 
 </details>
@@ -377,6 +389,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. A Unified Theory of Garbage Collection. [Bacon, Cheng, Rajan (2004)](https://courses.cs.washington.edu/courses/cse590p/05au/p50-bacon.pdf).
 1. TOR: The second generation onion router. [Dingledine et al (2004)](https://svn-archive.torproject.org/svn/projects/design-paper/tor-design.pdf).
 1. MapReduce: Simplified Data Processing on Large Clusters. [Dean, Ghemawat (2004)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/16cb30b4b92fd4989b8619a61752a2387c6dd474.pdf).
+1. Nix A Safe and Policy-Free System for Software Deployment. [Dolstra et al (2004)](https://edolstra.github.io/pubs/nspfssd-lisa2004-final.pdf).
 1. A Nanopass Framework for Compiler Education. [Sarkar, Waddell, Dybvig (2005)](https://legacy.cs.indiana.edu/~dyb/pubs/nano-jfp.pdf).
 1. Church's Thesis and Functional Programming. [Turner (2006)](https://kar.kent.ac.uk/88944/1/ctfp.pdf_nocoversheet).
 1. **An Incremental Approach to Compiler Construction. [Ghuloum (2006)](http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf).**
@@ -384,6 +397,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. Why the Internet only just works. [Handley (2006)](http://www0.cs.ucl.ac.uk/staff/m.handley/papers/only-just-works.pdf).
 1. Bigtable: A Distributed Storage System for Structured Data. [Chang et al (2006)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/68a74a85e1662fe02ff3967497f31fda7f32225c.pdf).
 1. Performance Anti-Patterns. [Smaalders (2006)](https://queue.acm.org/detail.cfm?id=1117403).
+1. **The Purely Functional Software Deployment Model. [Dolstra et al (2006)](https://edolstra.github.io/pubs/phd-thesis.pdf).**
 1. The Salsa20 family of stream ciphers. [Bernstein (2007)](https://cr.yp.to/snuffle/salsafamily-20071225.pdf).
 1. Paxos made live - An Engineering Perspective. [Chandra, Griesemer, Redstone (2007)](https://www.cs.utexas.edu/users/lorenzo/corsi/cs380d/papers/paper2-1.pdf).
 1. **Dynamo, Amazon’s Highly Available Key-value store. [DeCandia et al (2007)](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf).**
@@ -394,6 +408,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. ZooKeeper: wait-free coordination for internet scale systems. [Hunt et al (2010)](https://www.usenix.org/legacy/event/atc10/tech/full_papers/Hunt.pdf).
 1. The Hadoop Distributed File System. [Shvachko et al (2010)](https://cse.buffalo.edu/~okennedy/courses/papers/hdfs.pdf).
 1. Thinking Clearly about Performance. [Millsap (2010)](https://queue.acm.org/detail.cfm?id=1854041).
+1. NixOS A Purely Functional Linux Distribution. [Dolstra et al (2010)](https://edolstra.github.io/pubs/nixos-jfp-final.pdf).
 1. Kafka: a Distributed Messaging System for Log Processing. [Kreps, Narkhede, Rao (2011)](http://notes.stephenholiday.com/Kafka.pdf).
 1. Conflict-free Replicated Data Types. [Shapiro et al (2011)](https://pages.lip6.fr/Marc.Shapiro/papers/RR-7687.pdf).
 1. **Programming Paradigms for Dummies: What Every Programmer Should Know. [Van Roy (2012)](https://webperso.info.ucl.ac.be/~pvr/VanRoyChapter.pdf).**
@@ -413,6 +428,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. Amazon Aurora: Design Considerations for High Throughput Cloud-Native Relational Databases. [Verbitski et al (2017)](https://pages.cs.wisc.edu/~yxy/cs764-f20/papers/aurora-sigmod-17.pdf).
 1. Attention Is All You Need. [Vaswani et al (2017)](https://arxiv.org/pdf/1706.03762.pdf).
 1. Local-First Software: You Own Your Data, in spite of the Cloud. [Kleppmann et al (2019)](https://www.inkandswitch.com/local-first/static/local-first.pdf).
+1. **The Rust Programming Language. [Klabnik et al (2021)](https://rust-book.cs.brown.edu/title-page.html).**
 
 
 </details>

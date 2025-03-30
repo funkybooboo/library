@@ -639,7 +639,6 @@
     - title: "Statistical Modeling: The Two Cultures"
       author: Breiman
       year: 2001
-      # link: http://www2.math.uu.se/~thulin/mm/breiman.pdf
       link: https://projecteuclid.org/journalArticle/Download?urlId=10.1214%2Fss%2F1009213726
     - title: The Unreasonable Effectiveness of Data
       author: Halevy, Norvig, Pereira
@@ -661,3 +660,24 @@
       author: Mnih et al
       year: 2013
       link: https://arxiv.org/pdf/1312.5602.pdf
+
+- title: The Rust Programming Language
+  author: Klabnik et al
+  year: 2021
+  link: https://rust-book.cs.brown.edu/title-page.html
+  topics: [Programming Languages]
+
+- title: The Purely Functional Software Deployment Model
+  author: Dolstra et al
+  year: 2006
+  link: https://edolstra.github.io/pubs/phd-thesis.pdf
+  topics: [Nixos]
+  related:
+    - title: NixOS A Purely Functional Linux Distribution
+      author: Dolstra et al
+      year: 2010
+      link: https://edolstra.github.io/pubs/nixos-jfp-final.pdf
+    - title: Nix A Safe and Policy-Free System for Software Deployment
+      author: Dolstra et al
+      year: 2004
+      link: https://edolstra.github.io/pubs/nspfssd-lisa2004-final.pdf
