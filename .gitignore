@@ -3,3 +3,6 @@ venv
 
 papers_progress.yml
 *.pdf
+
+papers/
+cookies.txt
