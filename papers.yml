@@ -70,6 +70,10 @@
   link: http://compression.ru/download/articles/huff/huffman_1952_minimum-redundancy-codes.pdf
   topics: [Information Theory]
   related:
+    - title: Prediction and Entropy of Printed English
+      author: Shannon
+      year: 1950
+      link: https://www.princeton.edu/~wbialek/rome/refs/shannon_51.pdf
     - title: Fifty Years of Shannon Theory
       author: Verdú
       year: 1998
@@ -126,8 +130,8 @@
   related:
     - title: On the Criteria To Be Used in Decomposing Systems into Modules
       author: Parnas
-      year: 1971
-      link: https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.pdf
+      year: 1972
+      link: https://dl.acm.org/doi/pdf/10.1145/361598.361623
     - title: Information Distribution Aspects of Design Methodology
       author: Parnas
       year: 1972
@@ -388,7 +392,7 @@
     - title: Why the Internet only just works
       author: Handley
       year: 2006
-      link: http://www0.cs.ucl.ac.uk/staff/m.handley/papers/only-just-works.pdf
+      link: https://www2.cs.uh.edu/~gnawali/courses/cosc6377-f17/papers/Handley06.pdf
     - title: The Network is Reliable
       author: Bailis,  Kingsbury
       year: 2014
@@ -651,7 +655,7 @@
     - title: Generative Adversarial Nets
       author: Goodfellow et al
       year: 2014
-      link: https://proceedings.neurips.cc/paper_files/paper/2014/file/5ca3e9b122f61f8f06494c97b1afccf3-Paper.pdf
+      link: https://arxiv.org/pdf/1406.2661
     - title: ImageNet Classification with Deep Convolutional Neural Networks
       author: Krizhevsky, Sutskever, Hinton
       year: 2012

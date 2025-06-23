@@ -33,6 +33,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. **A Method for the Construction of Minimum-Redundancy Codes. [Huffman (1952)](http://compression.ru/download/articles/huff/huffman_1952_minimum-redundancy-codes.pdf).**
     \
     <sub>Information Theory</sub>
+    * Prediction and Entropy of Printed English. [Shannon (1950)](https://www.princeton.edu/~wbialek/rome/refs/shannon_51.pdf).
     * A Universal Algorithm for Sequential Data Compression. [Ziv, Lempel (1977)](https://courses.cs.duke.edu/spring03/cps296.5/papers/ziv_lempel_1977_universal_algorithm.pdf).
     * Fifty Years of Shannon Theory. [Verdú (1998)](https://monoskop.org/images/7/78/Verdu_Sergio_1998_Fifty_Years_of_Shannon_Theory.pdf).
 
@@ -51,7 +52,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. **A Design Methodology for Reliable Software Systems. [Liskov (1972)](https://dl.acm.org/doi/pdf/10.1145/1479992.1480018).**
     \
     <sub>Software Design</sub>
-    * On the Criteria To Be Used in Decomposing Systems into Modules. [Parnas (1971)](https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.pdf).
+    * On the Criteria To Be Used in Decomposing Systems into Modules. [Parnas (1972)](https://dl.acm.org/doi/pdf/10.1145/361598.361623).
     * Information Distribution Aspects of Design Methodology. [Parnas (1972)](https://cseweb.ucsd.edu/~wgg/CSE218/Parnas-IFIP71-information-distribution.PDF).
     * Programming with Abstract Data Types. [Liskov, Zilles (1974)](https://dl.acm.org/doi/pdf/10.1145/942572.807045).
     * Designing Software for Ease of Extension and Contraction. [Parnas (1979)](https://courses.cs.washington.edu/courses/cse503/08wi/parnas-1979.pdf).
@@ -132,7 +133,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * An algorithm for distributed computation of a Spanning Tree in an Extended LAN. [Perlman (1985)](https://dl.acm.org/doi/pdf/10.1145/319056.319004).
     * The Design Philosophy of the DARPA Internet Protocols. [Clark (1988)](http://ccr.sigcomm.org/archive/1995/jan95/ccr-9501-clark.pdf).
     * TOR: The second generation onion router. [Dingledine et al (2004)](https://svn-archive.torproject.org/svn/projects/design-paper/tor-design.pdf).
-    * Why the Internet only just works. [Handley (2006)](http://www0.cs.ucl.ac.uk/staff/m.handley/papers/only-just-works.pdf).
+    * Why the Internet only just works. [Handley (2006)](https://www2.cs.uh.edu/~gnawali/courses/cosc6377-f17/papers/Handley06.pdf).
     * The Network is Reliable. [Bailis,  Kingsbury (2014)](https://queue.acm.org/detail.cfm?id=2655736).
 
 1. **New Directions in Cryptography. [Diffie, Hellman (1976)](https://ee.stanford.edu/~hellman/publications/24.pdf).**
@@ -218,7 +219,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * The Unreasonable Effectiveness of Data. [Halevy, Norvig, Pereira (2009)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/35179.pdf).
     * ImageNet Classification with Deep Convolutional Neural Networks. [Krizhevsky, Sutskever, Hinton (2012)](https://papers.nips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf).
     * Playing Atari with Deep Reinforcement Learning. [Mnih et al (2013)](https://arxiv.org/pdf/1312.5602.pdf).
-    * Generative Adversarial Nets. [Goodfellow et al (2014)](https://proceedings.neurips.cc/paper_files/paper/2014/file/5ca3e9b122f61f8f06494c97b1afccf3-Paper.pdf).
+    * Generative Adversarial Nets. [Goodfellow et al (2014)](https://arxiv.org/pdf/1406.2661).
     * Deep Learning. [LeCun, Bengio, Hinton (2015)](https://www.cs.toronto.edu/~hinton/absps/NatureDeepReview.pdf).
     * Attention Is All You Need. [Vaswani et al (2017)](https://arxiv.org/pdf/1706.03762.pdf).
 
@@ -277,6 +278,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 
 1. As We May Think. [Bush (1945)](https://web.mit.edu/STS.035/www/PDFs/think.pdf).
 1. **Computing Machinery and Intelligence. [Turing (1950)](https://www.csee.umbc.edu/courses/471/papers/turing.pdf).**
+1. Prediction and Entropy of Printed English. [Shannon (1950)](https://www.princeton.edu/~wbialek/rome/refs/shannon_51.pdf).
 1. The Education of a Computer. [Hopper (1952)](https://people.cs.umass.edu/~emery/classes/cmpsci691st/readings/PL/p243-hopper.pdf).
 1. **A Method for the Construction of Minimum-Redundancy Codes. [Huffman (1952)](http://compression.ru/download/articles/huff/huffman_1952_minimum-redundancy-codes.pdf).**
 1. On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem. [Kruskal (1956)](https://www.ams.org/proc/1956-007-01/S0002-9939-1956-0078686-7/S0002-9939-1956-0078686-7.pdf).
@@ -302,9 +304,9 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. The nucleus of a multiprogramming system. [Hansen (1970)](http://www.brinch-hansen.net/papers/1970a.pdf).
 1. **A Relational Model of Data for Large Shared Data Banks. [Codd (1970)](https://www.seas.upenn.edu/~zives/03f/cis550/codd.pdf).**
 1. Program development by stepwise refinement. [Wirth (1971)](https://dl.acm.org/doi/pdf/10.1145/362575.362577).
-1. On the Criteria To Be Used in Decomposing Systems into Modules. [Parnas (1971)](https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.pdf).
 1. The Humble Programmer. [Dijkstra (1972)](http://rkka21.ru/docs/turing-award/ed1972e.pdf).
 1. **A Design Methodology for Reliable Software Systems. [Liskov (1972)](https://dl.acm.org/doi/pdf/10.1145/1479992.1480018).**
+1. On the Criteria To Be Used in Decomposing Systems into Modules. [Parnas (1972)](https://dl.acm.org/doi/pdf/10.1145/361598.361623).
 1. Information Distribution Aspects of Design Methodology. [Parnas (1972)](https://cseweb.ucsd.edu/~wgg/CSE218/Parnas-IFIP71-information-distribution.PDF).
 1. A Statistical Interpretation of Term Specificity in Retrieval. [Spärck Jones (1972)](http://openlib.org/home/krichel/courses/lis618/readings/spaerk-jones72.pdf).
 1. Computer Programming as an Art. [Knuth (1974)](http://www.cs.bilkent.edu.tr/~canf/knuth1974.pdf).
@@ -394,7 +396,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. Church's Thesis and Functional Programming. [Turner (2006)](https://kar.kent.ac.uk/88944/1/ctfp.pdf_nocoversheet).
 1. **An Incremental Approach to Compiler Construction. [Ghuloum (2006)](http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf).**
 1. Out of the Tar Pit. [Moseley, Marks (2006)](http://curtclifton.net/papers/MoseleyMarks06a.pdf).
-1. Why the Internet only just works. [Handley (2006)](http://www0.cs.ucl.ac.uk/staff/m.handley/papers/only-just-works.pdf).
+1. Why the Internet only just works. [Handley (2006)](https://www2.cs.uh.edu/~gnawali/courses/cosc6377-f17/papers/Handley06.pdf).
 1. Bigtable: A Distributed Storage System for Structured Data. [Chang et al (2006)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/68a74a85e1662fe02ff3967497f31fda7f32225c.pdf).
 1. Performance Anti-Patterns. [Smaalders (2006)](https://queue.acm.org/detail.cfm?id=1117403).
 1. **The Purely Functional Software Deployment Model. [Dolstra et al (2006)](https://edolstra.github.io/pubs/phd-thesis.pdf).**
@@ -421,7 +423,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. In Search of an Understandable Consensus Algorithm. [Ongaro, Ousterhout (2014)](https://raft.github.io/raft.pdf).
 1. IPFS - Content Addressed, Versioned, P2P File System. [Benet (2014)](https://raw.githubusercontent.com/ipfs/papers/master/ipfs-cap2pfs/ipfs-p2p-file-system.pdf).
 1. Ethereum: A Next-Generation Smart Contract and Decentralized Application Platform. [Buterin (2014)](https://ethereum.org/content/whitepaper/whitepaper-pdf/Ethereum_Whitepaper_-_Buterin_2014.pdf).
-1. Generative Adversarial Nets. [Goodfellow et al (2014)](https://proceedings.neurips.cc/paper_files/paper/2014/file/5ca3e9b122f61f8f06494c97b1afccf3-Paper.pdf).
+1. Generative Adversarial Nets. [Goodfellow et al (2014)](https://arxiv.org/pdf/1406.2661).
 1. Towards a Theory of Conceptual Design for Software. [Jackson (2015)](https://groups.csail.mit.edu/sdg/pubs/2015/concept-essay.pdf).
 1. Deep Learning. [LeCun, Bengio, Hinton (2015)](https://www.cs.toronto.edu/~hinton/absps/NatureDeepReview.pdf).
 1. Bringing the Web up to Speed with WebAssembly. [Haas (2017)](https://dl.acm.org/doi/pdf/10.1145/3062341.3062363).
