@@ -1,4 +1,16 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# CLI for managing paper reading progress.
+# deps (pyyaml, requests) are declared inline below; uv provisions them
+# automatically the first time you run this script.
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "pyyaml>=6.0.2",
+#     "requests>=2.32.3",
+# ]
+# ///
+
 import argparse
 import datetime
 import os

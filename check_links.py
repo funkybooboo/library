@@ -1,7 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # checks that all links in the paper yaml are reachable
-# requires pip install pyyaml requests
+# deps (pyyaml, requests) are declared inline below; uv provisions them
+# automatically the first time you run this script.
 
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "pyyaml>=6.0.2",
+#     "requests>=2.32.3",
+# ]
+# ///
 
 import requests
 import urllib3

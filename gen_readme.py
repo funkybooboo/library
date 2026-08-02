@@ -1,8 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 # usage:
 # ./gen_readme.py > README.md
-#
-# requires pip install pyyaml
+# dep (pyyaml) is declared inline below; uv provisions it automatically
+# the first time you run this script.
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "pyyaml>=6.0.2",
+# ]
+# ///
 
 import yaml
 
