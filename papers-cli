@@ -1,5 +1,8 @@
-#!/usr/bin/env -S uv run
+#!/usr/bin/env -S uv run --script
 # CLI for managing paper reading progress and downloading PDFs.
+# Run directly: ./papers-cli <command> ...  (uv provisions deps from the
+# inline script-metadata block below -- the --script flag is needed because
+# this file has no .py extension, so uv can't infer it's a PEP 723 script).
 # deps (pyyaml, requests) are declared inline below; uv provisions them
 # automatically the first time you run this script.
 
@@ -16,6 +19,10 @@ import concurrent.futures
 import datetime
 import os
 import re
+import shlex
+import subprocess
+import time
+import webbrowser
 import yaml
 import requests
 
@@ -417,6 +424,58 @@ def download_paper(paper_id):
         print(f"Error downloading paper: {e}")
 
 
+def open_failed(failed_path=None, batch=8, pause=1.5, dry_run=False):
+    """
+    Read papers/failed.md (written by 'download all'), open every failed URL
+    in the user's default browser in small batches so the browser can solve
+    Cloudflare/login challenges that the CLI can't. ACM 403s are the usual case.
+    Parses the controlled failed.md format, so it stays in sync with download.
+    """
+    path = failed_path or os.path.join(DOWNLOAD_DIR, "failed.md")
+    if not os.path.exists(path):
+        print(f"{path} not found -- run './papers-cli download' first to generate it.")
+        return []
+    # Line-based scan: grab each '  - URL: <url>' line, paired with the most
+    # recent '- **title** (status)' line above it. Robust to the Category line
+    # written between them and to trailing Reason lines.
+    titles = []
+    for line in open(path):
+        m = re.match(r"^- \*\*(.+?)\*\* \((\w+)\)", line)
+        if m:
+            titles.append(m.group(1))
+            continue
+        m = re.match(r"^\s*- URL: <(.+?)>", line)
+        if m:
+            titles.append(m.group(1))
+    # titles now alternates: title, url, title, url, ...
+    pairs = list(zip(titles[0::2], titles[1::2]))
+    if not pairs:
+        print(f"No failed URLs recorded in {path}.")
+        return []
+    print(f"Opening {len(pairs)} failed-download URL{'s' if len(pairs)!=1 else ''} from {path}...")
+    if dry_run:
+        for t, u in pairs:
+            print(f"  [dry-run] {t}  ->  {u}")
+        return [u for _, u in pairs]
+    opened = []
+    for i, (title, url) in enumerate(pairs, 1):
+        print(f"  [{i}/{len(pairs)}] {title}")
+        try:
+            webbrowser.open(url, new=1, autoraise=True)
+            opened.append(url)
+        except Exception as e:
+            print(f"    -> couldn't open: {e}")
+        # Throttle so we don't fire dozens of tabs at once (ACM/Cloudflare
+        # rate-limits; browsers also choke on opening 40+ tabs instantly).
+        if i % batch == 0 and i < len(pairs):
+            print(f"    (batch {i // batch} opened; pausing {pause}s before the next...)")
+            time.sleep(pause)
+    print(f"\nOpened {len(opened)} URLs in your browser.")
+    print("Each PDF will render in-browser; save it (Ctrl+S -> Save as PDF) into "
+          "papers/<topic>/ if you want it on disk, or just read it online.")
+    return opened
+
+
 def main():
     parser = argparse.ArgumentParser(description="CLI for managing paper reading progress and downloading PDFs")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
@@ -451,6 +510,24 @@ def main():
         "--jobs", "-j", type=int, default=6,
         help="Parallel workers for 'download all' (default: 6)")
 
+    # open-failed: open every URL from papers/failed.md in the default browser
+    # (for Cloudflare/login-walled hosts like dl.acm.org the CLI can't bypass).
+    parser_open = subparsers.add_parser(
+        "open-failed",
+        help="Open every failed-download URL from papers/failed.md in your browser")
+    parser_open.add_argument(
+        "--file", default=None,
+        help=f"Path to a failed.md (default: {DOWNLOAD_DIR}/failed.md)")
+    parser_open.add_argument(
+        "--batch", type=int, default=8,
+        help="Open this many tabs per batch, then pause briefly (default: 8)")
+    parser_open.add_argument(
+        "--pause", type=float, default=1.5,
+        help="Seconds to pause between batches (default: 1.5)")
+    parser_open.add_argument(
+        "--dry-run", action="store_true",
+        help="Just list the URLs that would be opened, don't launch the browser")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -471,6 +548,8 @@ def main():
                 download_paper(int(args.target))
             except ValueError:
                 parser_download.error(f"download target must be 'all' or a paper ID, got {args.target!r}")
+    elif args.command == "open-failed":
+        open_failed(args.file, args.batch, args.pause, args.dry_run)
     else:
         parser.print_help()
 
