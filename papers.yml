@@ -104,7 +104,7 @@
     - title: On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem
       author: Kruskal
       year: 1956
-      link: https://www.ams.org/proc/1956-007-01/S0002-9939-1956-0078686-7/S0002-9939-1956-0078686-7.pdf
+      link: https://www.cs.yale.edu/homes/lans/readings/routing/kruskal-1956.pdf
     - title: A Note on Two Problems in Connexion with Graphs
       author: Dijkstra
       year: 1959
@@ -178,7 +178,7 @@
     - title: Why Functional Programming Matters
       author: Hughes
       year: 1990
-      link: https://www.cs.utexas.edu/~shmat/courses/cs345/whyfp.pdf
+      link: https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf
     - title: Can Programming Be Liberated from the von Neumann Style?
       author: Backus
       year: 1978
@@ -221,7 +221,7 @@
     - title: A Nanopass Framework for Compiler Education
       author: Sarkar, Waddell, Dybvig
       year: 2005
-      link: https://legacy.cs.indiana.edu/~dyb/pubs/nano-jfp.pdf
+      link: "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/1E378B9B451270AF6A155FA0C21C04A3/S0956796805005605a.pdf/educational_pearl_a_nanopass_framework_for_compiler_education.pdf"
     - title: "LLVM: A Compilation Framework for Lifelong Program Analysis & Transformation"
       author: Lattner, Adve
       year: 2004
@@ -264,7 +264,7 @@
     - title: Managing the Development of Large Software Systems
       author: Royce
       year: 1970
-      link: https://www.praxisframework.org/files/royce1970.pdf
+      link: https://dl.acm.org/doi/pdf/10.5555/41765.41801
     - title: The Cathedral and the Bazaar
       author: Raymond
       year: 1998
@@ -289,7 +289,7 @@
 - title: Communicating sequential processes
   author: Hoare
   year: 1978
-  link: https://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf
+  link: https://dl.acm.org/doi/pdf/10.1145/359576.359585
   topics: [Concurrency]
   related:
     - title: Solution Of a Problem in Concurrent Program Control
@@ -458,7 +458,7 @@
     - title: Practical Byzantine Fault Tolerance
       author: Castro, Liskov
       year: 1999
-      link: https://pmg.csail.mit.edu/papers/osdi99.pdf
+      link: https://css.csail.mit.edu/6.824/2014/papers/castro-practicalbft.pdf
 
 - title: "Designing for Usability: Key Principles and What Designers Think"
   author: Gould, Lewis
@@ -485,7 +485,7 @@
     - title: "The star user interface: an overview"
       author: Smith, Irby, Kimball
       year: 1982
-      link: https://www.tech-insider.org/star/research/acrobat/8206.pdf
+      link: https://dl.acm.org/doi/pdf/10.1145/1500774.1500840
     - title: Design Principles for Human-Computer Interfaces
       author: Norman
       year: 1983
@@ -578,22 +578,7 @@
     - title: Building on Quicksand
       author: Helland, Campbell
       year: 2009
-      link: https://arxiv.org/ftp/arxiv/papers/0909/0909.1788.pdf
-
-- title: "Thinking Methodically about Performance"
-  author: Gregg
-  year: 2012
-  link: https://queue.acm.org/detail.cfm?id=2413037
-  topics: [Performance]
-  related:
-    - title: Thinking Clearly about Performance
-      author: Millsap
-      year: 2010
-      link: https://queue.acm.org/detail.cfm?id=1854041
-    - title: Performance Anti-Patterns
-      author: Smaalders
-      year: 2006
-      link: https://queue.acm.org/detail.cfm?id=1117403
+      link: https://arxiv.org/pdf/0909.1788
 
 - title: Bitcoin, A peer-to-peer electronic cash system
   author: Nakamoto
@@ -608,7 +593,7 @@
     - title: Conflict-free Replicated Data Types
       author: Shapiro et al
       year: 2011
-      link: https://pages.lip6.fr/Marc.Shapiro/papers/RR-7687.pdf
+      link: https://inria.hal.science/hal-00932836/file/CRDTs_SSS-2011.pdf
     - title: "Incentives Build Robustness in BitTorrent"
       author: Cohen
       link: https://www.bittorrent.org/bittorrentecon.pdf
@@ -659,7 +644,7 @@
     - title: ImageNet Classification with Deep Convolutional Neural Networks
       author: Krizhevsky, Sutskever, Hinton
       year: 2012
-      link: https://papers.nips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf
+      link: https://www.cs.cmu.edu/~epxing/Class/10715-14f/reading/imagenet.pdf
     - title: Playing Atari with Deep Reinforcement Learning
       author: Mnih et al
       year: 2013

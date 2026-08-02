@@ -40,7 +40,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. **Engineering a Sort Function. [Bentley, McIlroy (1993)](https://cs.fit.edu/~pkc/classes/writing/samples/bentley93engineering.pdf).**
     \
     <sub>Data Structures; Algorithms</sub>
-    * On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem. [Kruskal (1956)](https://www.ams.org/proc/1956-007-01/S0002-9939-1956-0078686-7/S0002-9939-1956-0078686-7.pdf).
+    * On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem. [Kruskal (1956)](https://www.cs.yale.edu/homes/lans/readings/routing/kruskal-1956.pdf).
     * A Note on Two Problems in Connexion with Graphs. [Dijkstra (1959)](https://jmvidal.cse.sc.edu/library/dijkstra59a.pdf).
     * Quicksort. [Hoare (1962)](https://dl.acm.org/doi/pdf/10.5555/63445.C1104357).
     * Space/Time Trade-offs in Hash Coding with Allowable Errors. [Bloom (1970)](https://dl.acm.org/doi/pdf/10.1145/362686.362692).
@@ -69,7 +69,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * Can Programming Be Liberated from the von Neumann Style? [Backus (1978)](https://dl.acm.org/doi/pdf/10.1145/359576.359579).
     * The Semantic Elegance of Applicative Languages. [Turner (1981)](http://nsl.com/misc/sasl/paraffins-turner.pdf).
     * On understanding types, data abstraction, and polymorphism. [Cardelli, Wegner (1985)](https://dl.acm.org/doi/pdf/10.1145/6041.6042).
-    * Why Functional Programming Matters. [Hughes (1990)](https://www.cs.utexas.edu/~shmat/courses/cs345/whyfp.pdf).
+    * Why Functional Programming Matters. [Hughes (1990)](https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf).
     * SELF: The Power of Simplicity. [Ungar, Smith (1991)](https://people.eecs.berkeley.edu/~fateman/264/papers/selfpower.ps).
     * The essence of functional programming. [Wadler (1992)](https://dl.acm.org/doi/pdf/10.1145/143165.143169).
     * QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs. [Claessen, Hughes (2000)](https://dl.acm.org/doi/pdf/10.1145/351240.351266).
@@ -84,14 +84,14 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * A Brief History of Just-In-Time. [Aycock (2003)](https://www.cs.tufts.edu/comp/150CMP/papers/aycock03jit.pdf).
     * LLVM: A Compilation Framework for Lifelong Program Analysis & Transformation. [Lattner, Adve (2004)](https://llvm.org/pubs/2004-01-30-CGO-LLVM.pdf).
     * A Unified Theory of Garbage Collection. [Bacon, Cheng, Rajan (2004)](https://courses.cs.washington.edu/courses/cse590p/05au/p50-bacon.pdf).
-    * A Nanopass Framework for Compiler Education. [Sarkar, Waddell, Dybvig (2005)](https://legacy.cs.indiana.edu/~dyb/pubs/nano-jfp.pdf).
+    * A Nanopass Framework for Compiler Education. [Sarkar, Waddell, Dybvig (2005)](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/1E378B9B451270AF6A155FA0C21C04A3/S0956796805005605a.pdf/educational_pearl_a_nanopass_framework_for_compiler_education.pdf).
     * Bringing the Web up to Speed with WebAssembly. [Haas (2017)](https://dl.acm.org/doi/pdf/10.1145/3062341.3062363).
 
 1. **No Silver Bullet: Essence and Accidents of Software Engineering. [Brooks (1987)](http://worrydream.com/refs/Brooks-NoSilverBullet.pdf).**
     \
     <sub>Software Engineering; Project Management</sub>
     * How do committees invent? [Conway (1968)](https://www.melconway.com/Home/pdf/committees.pdf).
-    * Managing the Development of Large Software Systems. [Royce (1970)](https://www.praxisframework.org/files/royce1970.pdf).
+    * Managing the Development of Large Software Systems. [Royce (1970)](https://dl.acm.org/doi/pdf/10.5555/41765.41801).
     * The Mythical Man Month. [Brooks (1975)](https://www.cs.virginia.edu/~evans/greatworks/mythical.pdf).
     * On Building Systems That Will Fail. [Corbató (1991)](https://dl.acm.org/doi/pdf/10.1145/114669.114686).
     * Software Aging. [Parnas (1994)](https://dl.acm.org/doi/pdf/10.5555/257734.257788).
@@ -99,7 +99,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * The Cathedral and the Bazaar. [Raymond (1998)](http://users.ece.utexas.edu/~perry/education/382v-s08/papers/raymond.pdf).
     * Out of the Tar Pit. [Moseley, Marks (2006)](http://curtclifton.net/papers/MoseleyMarks06a.pdf).
 
-1. **Communicating sequential processes. [Hoare (1978)](https://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf).**
+1. **Communicating sequential processes. [Hoare (1978)](https://dl.acm.org/doi/pdf/10.1145/359576.359585).**
     \
     <sub>Concurrency</sub>
     * Solution Of a Problem in Concurrent Program Control. [Dijkstra (1965)](https://dl.acm.org/doi/pdf/10.1145/365559.365617).
@@ -151,7 +151,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * The Byzantine Generals Problem. [Lamport, Shostak, Pease (1982)](https://lamport.azurewebsites.net/pubs/byz.pdf).
     * Impossibility of Distributed Consensus With One Faulty Process. [Fisher, Lynch, Patterson (1985)](https://groups.csail.mit.edu/tds/papers/Lynch/jacm85.pdf).
     * Implementing Fault-Tolerant Services Using the State Machine Approach: A Tutorial. [Schneider (1990)](https://www.cs.cornell.edu/fbs/publications/SMSurvey.pdf).
-    * Practical Byzantine Fault Tolerance. [Castro, Liskov (1999)](https://pmg.csail.mit.edu/papers/osdi99.pdf).
+    * Practical Byzantine Fault Tolerance. [Castro, Liskov (1999)](https://css.csail.mit.edu/6.824/2014/papers/castro-practicalbft.pdf).
     * Paxos made simple. [Lamport (2001)](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf).
     * Paxos made live - An Engineering Perspective. [Chandra, Griesemer, Redstone (2007)](https://www.cs.utexas.edu/users/lorenzo/corsi/cs380d/papers/paper2-1.pdf).
     * In Search of an Understandable Consensus Algorithm. [Ongaro, Ousterhout (2014)](https://raft.github.io/raft.pdf).
@@ -163,7 +163,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * Man-Computer symbiosis. [Licklider (1958)](http://worrydream.com/refs/Licklider%20-%20Man-Computer%20Symbiosis.pdf).
     * Some Thoughts About the Social Implications of Accessible Computing. [David, Fano (1965)](https://dl.acm.org/doi/pdf/10.1145/1463891.1463917).
     * Tutorials for the First-Time Computer User. [Al-Awar, Chapanis, Ford (1981)](https://drive.google.com/file/d/1zA4LkSHoanjjhOVCwYzrkdkdzgPbKWJ9/view?usp=sharing).
-    * The star user interface: an overview. [Smith, Irby, Kimball (1982)](https://www.tech-insider.org/star/research/acrobat/8206.pdf).
+    * The star user interface: an overview. [Smith, Irby, Kimball (1982)](https://dl.acm.org/doi/pdf/10.1145/1500774.1500840).
     * Design Principles for Human-Computer Interfaces. [Norman (1983)](https://dl.acm.org/doi/pdf/10.1145/800045.801571).
     * Human-Computer Interaction: Psychology as a Science of Design. [Carroll (1997)](https://home.cs.colorado.edu/~martin/Csci6402/Papers/carroll97.pdf).
 
@@ -193,13 +193,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * Why do computers stop and what can be done about it? [Gray (1985)](https://jimgray.azurewebsites.net/papers/TandemTR85.7_WhyDoComputersStop.pdf).
     * Recovery Oriented Computing (ROC): Motivation, Definition, Techniques, and Case Studies. [Patterson et al (2002)](http://www2.eecs.berkeley.edu/Pubs/TechRpts/2002/CSD-02-1175.pdf).
     * Crash-Only Software. [Candea, Fox (2003)](https://research.cs.wisc.edu/areas/os/ReadingGroup/os-old/Papers/HotOSIX/Candea-CrashOnlySoftware.pdf).
-    * Building on Quicksand. [Helland, Campbell (2009)](https://arxiv.org/ftp/arxiv/papers/0909/0909.1788.pdf).
-
-1. **Thinking Methodically about Performance. [Gregg (2012)](https://queue.acm.org/detail.cfm?id=2413037).**
-    \
-    <sub>Performance</sub>
-    * Performance Anti-Patterns. [Smaalders (2006)](https://queue.acm.org/detail.cfm?id=1117403).
-    * Thinking Clearly about Performance. [Millsap (2010)](https://queue.acm.org/detail.cfm?id=1854041).
+    * Building on Quicksand. [Helland, Campbell (2009)](https://arxiv.org/pdf/0909.1788).
 
 1. **Bitcoin, A peer-to-peer electronic cash system. [Nakamoto (2008)](https://bitcoin.org/bitcoin.pdf).**
     \
@@ -207,7 +201,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     * Operational transformation in real-time group editors: issues, algorithms, and achievements. [Sun, Ellis (1998)](https://dl.acm.org/doi/pdf/10.1145/289444.289469).
     * Kademlia: A Peer-to-Peer Information System Based on the XOR Metric. [Maymounkov, Mazières (2002)](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf).
     * Incentives Build Robustness in BitTorrent. [Cohen (2003)](https://www.bittorrent.org/bittorrentecon.pdf).
-    * Conflict-free Replicated Data Types. [Shapiro et al (2011)](https://pages.lip6.fr/Marc.Shapiro/papers/RR-7687.pdf).
+    * Conflict-free Replicated Data Types. [Shapiro et al (2011)](https://inria.hal.science/hal-00932836/file/CRDTs_SSS-2011.pdf).
     * IPFS - Content Addressed, Versioned, P2P File System. [Benet (2014)](https://raw.githubusercontent.com/ipfs/papers/master/ipfs-cap2pfs/ipfs-p2p-file-system.pdf).
     * Ethereum: A Next-Generation Smart Contract and Decentralized Application Platform. [Buterin (2014)](https://ethereum.org/content/whitepaper/whitepaper-pdf/Ethereum_Whitepaper_-_Buterin_2014.pdf).
     * Local-First Software: You Own Your Data, in spite of the Cloud. [Kleppmann et al (2019)](https://www.inkandswitch.com/local-first/static/local-first.pdf).
@@ -217,7 +211,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
     <sub>Machine Learning</sub>
     * Statistical Modeling: The Two Cultures. [Breiman (2001)](https://projecteuclid.org/journalArticle/Download?urlId=10.1214%2Fss%2F1009213726).
     * The Unreasonable Effectiveness of Data. [Halevy, Norvig, Pereira (2009)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/35179.pdf).
-    * ImageNet Classification with Deep Convolutional Neural Networks. [Krizhevsky, Sutskever, Hinton (2012)](https://papers.nips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf).
+    * ImageNet Classification with Deep Convolutional Neural Networks. [Krizhevsky, Sutskever, Hinton (2012)](https://www.cs.cmu.edu/~epxing/Class/10715-14f/reading/imagenet.pdf).
     * Playing Atari with Deep Reinforcement Learning. [Mnih et al (2013)](https://arxiv.org/pdf/1312.5602.pdf).
     * Generative Adversarial Nets. [Goodfellow et al (2014)](https://arxiv.org/pdf/1406.2661).
     * Deep Learning. [LeCun, Bengio, Hinton (2015)](https://www.cs.toronto.edu/~hinton/absps/NatureDeepReview.pdf).
@@ -251,7 +245,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. **Programming Paradigms for Dummies: What Every Programmer Should Know. [Van Roy (2012)](https://webperso.info.ucl.ac.be/~pvr/VanRoyChapter.pdf).**
 1. **An Incremental Approach to Compiler Construction. [Ghuloum (2006)](http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf).**
 1. **No Silver Bullet: Essence and Accidents of Software Engineering. [Brooks (1987)](http://worrydream.com/refs/Brooks-NoSilverBullet.pdf).**
-1. **Communicating sequential processes. [Hoare (1978)](https://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf).**
+1. **Communicating sequential processes. [Hoare (1978)](https://dl.acm.org/doi/pdf/10.1145/359576.359585).**
 1. **The UNIX Time- Sharing System. [Ritchie, Thompson (1974)](https://dsf.berkeley.edu/cs262/unix.pdf).**
 1. **A Relational Model of Data for Large Shared Data Banks. [Codd (1970)](https://www.seas.upenn.edu/~zives/03f/cis550/codd.pdf).**
 1. **A Protocol for Packet Network Intercommunication. [Cerf, Kahn (1974)](https://www.cs.princeton.edu/courses/archive/fall06/cos561/papers/cerf74.pdf).**
@@ -261,7 +255,6 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. **The anatomy of a large-scale hypertextual Web search engine. [Brin, Page (1998)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/334.pdf).**
 1. **Dynamo, Amazon’s Highly Available Key-value store. [DeCandia et al (2007)](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf).**
 1. **On Designing and Deploying Internet Scale Services. [Hamilton (2007)](https://s3.amazonaws.com/systemsandpapers/papers/hamilton.pdf).**
-1. **Thinking Methodically about Performance. [Gregg (2012)](https://queue.acm.org/detail.cfm?id=2413037).**
 1. **Bitcoin, A peer-to-peer electronic cash system. [Nakamoto (2008)](https://bitcoin.org/bitcoin.pdf).**
 1. **A Few Useful Things to Know About Machine Learning. [Domingos (2012)](https://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf).**
 1. **The Rust Programming Language. [Klabnik et al (2021)](https://rust-book.cs.brown.edu/title-page.html).**
@@ -281,7 +274,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. Prediction and Entropy of Printed English. [Shannon (1950)](https://www.princeton.edu/~wbialek/rome/refs/shannon_51.pdf).
 1. The Education of a Computer. [Hopper (1952)](https://people.cs.umass.edu/~emery/classes/cmpsci691st/readings/PL/p243-hopper.pdf).
 1. **A Method for the Construction of Minimum-Redundancy Codes. [Huffman (1952)](http://compression.ru/download/articles/huff/huffman_1952_minimum-redundancy-codes.pdf).**
-1. On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem. [Kruskal (1956)](https://www.ams.org/proc/1956-007-01/S0002-9939-1956-0078686-7/S0002-9939-1956-0078686-7.pdf).
+1. On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem. [Kruskal (1956)](https://www.cs.yale.edu/homes/lans/readings/routing/kruskal-1956.pdf).
 1. Man-Computer symbiosis. [Licklider (1958)](http://worrydream.com/refs/Licklider%20-%20Man-Computer%20Symbiosis.pdf).
 1. A Note on Two Problems in Connexion with Graphs. [Dijkstra (1959)](https://jmvidal.cse.sc.edu/library/dijkstra59a.pdf).
 1. Recursive Programming. [Dijkstra (1960)](https://www.ics.uci.edu/~jajones/INF102-S18/readings/07_dijkstra.pdf).
@@ -300,7 +293,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. The Structure of the \"THE\"-Multiprogramming System. [Dijkstra (1968)](https://www.eecs.ucf.edu/~eurip/papers/dijkstra-the68.pdf).
 1. **Von Neumann's First Computer Program. [Knuth (1970)](https://dl.acm.org/doi/pdf/10.1145/356580.356581).**
 1. Space/Time Trade-offs in Hash Coding with Allowable Errors. [Bloom (1970)](https://dl.acm.org/doi/pdf/10.1145/362686.362692).
-1. Managing the Development of Large Software Systems. [Royce (1970)](https://www.praxisframework.org/files/royce1970.pdf).
+1. Managing the Development of Large Software Systems. [Royce (1970)](https://dl.acm.org/doi/pdf/10.5555/41765.41801).
 1. The nucleus of a multiprogramming system. [Hansen (1970)](http://www.brinch-hansen.net/papers/1970a.pdf).
 1. **A Relational Model of Data for Large Shared Data Banks. [Codd (1970)](https://www.seas.upenn.edu/~zives/03f/cis550/codd.pdf).**
 1. Program development by stepwise refinement. [Wirth (1971)](https://dl.acm.org/doi/pdf/10.1145/362575.362577).
@@ -323,7 +316,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. The Smalltalk-76 Programming System Design and Implementation. [Ingalls (1978)](https://dl.acm.org/doi/pdf/10.1145/512760.512762).
 1. A Theory of Type Polymorphism in Programming. [Milner (1978)](https://homepages.inf.ed.ac.uk/wadler/papers/papers-we-love/milner-type-polymorphism.pdf).
 1. Can Programming Be Liberated from the von Neumann Style? [Backus (1978)](https://dl.acm.org/doi/pdf/10.1145/359576.359579).
-1. **Communicating sequential processes. [Hoare (1978)](https://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf).**
+1. **Communicating sequential processes. [Hoare (1978)](https://dl.acm.org/doi/pdf/10.1145/359576.359585).**
 1. On the Duality of Operating System Structures. [Lauer, Needham (1978)](https://dl.acm.org/doi/pdf/10.1145/850657.850658).
 1. Ethernet: Distributed packet switching for local computer networks. [Metcalfe, Boggs (1978)](https://dl.acm.org/doi/pdf/10.1145/360248.360253).
 1. A Method for Obtaining Digital Signatures and Public-Key Cryptosystems. [Rivest, Shamir, Adleman (1978)](https://dl.acm.org/doi/pdf/10.1145/359340.359342).
@@ -337,7 +330,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. The Transaction Concept: Virtues and Limitations. [Gray (1981)](https://jimgray.azurewebsites.net/papers/theTransactionConcept.pdf).
 1. Tutorials for the First-Time Computer User. [Al-Awar, Chapanis, Ford (1981)](https://drive.google.com/file/d/1zA4LkSHoanjjhOVCwYzrkdkdzgPbKWJ9/view?usp=sharing).
 1. The Byzantine Generals Problem. [Lamport, Shostak, Pease (1982)](https://lamport.azurewebsites.net/pubs/byz.pdf).
-1. The star user interface: an overview. [Smith, Irby, Kimball (1982)](https://www.tech-insider.org/star/research/acrobat/8206.pdf).
+1. The star user interface: an overview. [Smith, Irby, Kimball (1982)](https://dl.acm.org/doi/pdf/10.1145/1500774.1500840).
 1. Design Principles for Human-Computer Interfaces. [Norman (1983)](https://dl.acm.org/doi/pdf/10.1145/800045.801571).
 1. Ironies of Automation. [Bainbridge (1983)](https://ckrybus.com/static/papers/Bainbridge_1983_Automatica.pdf).
 1. Literate Programming. [Knuth (1984)](http://www.literateprogramming.com/knuthweb.pdf).
@@ -358,7 +351,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. **No Silver Bullet: Essence and Accidents of Software Engineering. [Brooks (1987)](http://worrydream.com/refs/Brooks-NoSilverBullet.pdf).**
 1. A Digital Signature Based on a Conventional Encryption Function. [Merkle (1987)](https://people.eecs.berkeley.edu/~raluca/cs261-f15/readings/merkle.pdf).
 1. The Design Philosophy of the DARPA Internet Protocols. [Clark (1988)](http://ccr.sigcomm.org/archive/1995/jan95/ccr-9501-clark.pdf).
-1. Why Functional Programming Matters. [Hughes (1990)](https://www.cs.utexas.edu/~shmat/courses/cs345/whyfp.pdf).
+1. Why Functional Programming Matters. [Hughes (1990)](https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf).
 1. Implementing Fault-Tolerant Services Using the State Machine Approach: A Tutorial. [Schneider (1990)](https://www.cs.cornell.edu/fbs/publications/SMSurvey.pdf).
 1. Information Management: A Proposal. [Berners-Lee (1990)](https://cds.cern.ch/record/369245/files/dd-89-001.pdf).
 1. SELF: The Power of Simplicity. [Ungar, Smith (1991)](https://people.eecs.berkeley.edu/~fateman/264/papers/selfpower.ps).
@@ -377,7 +370,7 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. The PageRank Citation Ranking: Bringing Order to the Web. [Page, Brin, Motwani (1998)](https://www.cis.upenn.edu/~mkearns/teaching/NetworkedLife/pagerank.pdf).
 1. Operational transformation in real-time group editors: issues, algorithms, and achievements. [Sun, Ellis (1998)](https://dl.acm.org/doi/pdf/10.1145/289444.289469).
 1. Rules of Thumb in Data Engineering. [Gray, Shenay (1999)](http://research.microsoft.com/en-us/um/people/gray/papers/ms_tr_99_100_rules_of_thumb_in_data_engineering.pdf).
-1. Practical Byzantine Fault Tolerance. [Castro, Liskov (1999)](https://pmg.csail.mit.edu/papers/osdi99.pdf).
+1. Practical Byzantine Fault Tolerance. [Castro, Liskov (1999)](https://css.csail.mit.edu/6.824/2014/papers/castro-practicalbft.pdf).
 1. QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs. [Claessen, Hughes (2000)](https://dl.acm.org/doi/pdf/10.1145/351240.351266).
 1. Paxos made simple. [Lamport (2001)](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf).
 1. Statistical Modeling: The Two Cultures. [Breiman (2001)](https://projecteuclid.org/journalArticle/Download?urlId=10.1214%2Fss%2F1009213726).
@@ -392,32 +385,29 @@ See the [sources](#sources) and [selection criteria](#selection-criteria) below.
 1. TOR: The second generation onion router. [Dingledine et al (2004)](https://svn-archive.torproject.org/svn/projects/design-paper/tor-design.pdf).
 1. MapReduce: Simplified Data Processing on Large Clusters. [Dean, Ghemawat (2004)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/16cb30b4b92fd4989b8619a61752a2387c6dd474.pdf).
 1. Nix A Safe and Policy-Free System for Software Deployment. [Dolstra et al (2004)](https://edolstra.github.io/pubs/nspfssd-lisa2004-final.pdf).
-1. A Nanopass Framework for Compiler Education. [Sarkar, Waddell, Dybvig (2005)](https://legacy.cs.indiana.edu/~dyb/pubs/nano-jfp.pdf).
+1. A Nanopass Framework for Compiler Education. [Sarkar, Waddell, Dybvig (2005)](https://www.cambridge.org/core/services/aop-cambridge-core/content/view/1E378B9B451270AF6A155FA0C21C04A3/S0956796805005605a.pdf/educational_pearl_a_nanopass_framework_for_compiler_education.pdf).
 1. Church's Thesis and Functional Programming. [Turner (2006)](https://kar.kent.ac.uk/88944/1/ctfp.pdf_nocoversheet).
 1. **An Incremental Approach to Compiler Construction. [Ghuloum (2006)](http://scheme2006.cs.uchicago.edu/11-ghuloum.pdf).**
 1. Out of the Tar Pit. [Moseley, Marks (2006)](http://curtclifton.net/papers/MoseleyMarks06a.pdf).
 1. Why the Internet only just works. [Handley (2006)](https://www2.cs.uh.edu/~gnawali/courses/cosc6377-f17/papers/Handley06.pdf).
 1. Bigtable: A Distributed Storage System for Structured Data. [Chang et al (2006)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/68a74a85e1662fe02ff3967497f31fda7f32225c.pdf).
-1. Performance Anti-Patterns. [Smaalders (2006)](https://queue.acm.org/detail.cfm?id=1117403).
 1. **The Purely Functional Software Deployment Model. [Dolstra et al (2006)](https://edolstra.github.io/pubs/phd-thesis.pdf).**
 1. The Salsa20 family of stream ciphers. [Bernstein (2007)](https://cr.yp.to/snuffle/salsafamily-20071225.pdf).
 1. Paxos made live - An Engineering Perspective. [Chandra, Griesemer, Redstone (2007)](https://www.cs.utexas.edu/users/lorenzo/corsi/cs380d/papers/paper2-1.pdf).
 1. **Dynamo, Amazon’s Highly Available Key-value store. [DeCandia et al (2007)](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf).**
 1. **On Designing and Deploying Internet Scale Services. [Hamilton (2007)](https://s3.amazonaws.com/systemsandpapers/papers/hamilton.pdf).**
 1. **Bitcoin, A peer-to-peer electronic cash system. [Nakamoto (2008)](https://bitcoin.org/bitcoin.pdf).**
-1. Building on Quicksand. [Helland, Campbell (2009)](https://arxiv.org/ftp/arxiv/papers/0909/0909.1788.pdf).
+1. Building on Quicksand. [Helland, Campbell (2009)](https://arxiv.org/pdf/0909.1788).
 1. The Unreasonable Effectiveness of Data. [Halevy, Norvig, Pereira (2009)](https://storage.googleapis.com/gweb-research2023-media/pubtools/pdf/35179.pdf).
 1. ZooKeeper: wait-free coordination for internet scale systems. [Hunt et al (2010)](https://www.usenix.org/legacy/event/atc10/tech/full_papers/Hunt.pdf).
 1. The Hadoop Distributed File System. [Shvachko et al (2010)](https://cse.buffalo.edu/~okennedy/courses/papers/hdfs.pdf).
-1. Thinking Clearly about Performance. [Millsap (2010)](https://queue.acm.org/detail.cfm?id=1854041).
 1. NixOS A Purely Functional Linux Distribution. [Dolstra et al (2010)](https://edolstra.github.io/pubs/nixos-jfp-final.pdf).
 1. Kafka: a Distributed Messaging System for Log Processing. [Kreps, Narkhede, Rao (2011)](http://notes.stephenholiday.com/Kafka.pdf).
-1. Conflict-free Replicated Data Types. [Shapiro et al (2011)](https://pages.lip6.fr/Marc.Shapiro/papers/RR-7687.pdf).
+1. Conflict-free Replicated Data Types. [Shapiro et al (2011)](https://inria.hal.science/hal-00932836/file/CRDTs_SSS-2011.pdf).
 1. **Programming Paradigms for Dummies: What Every Programmer Should Know. [Van Roy (2012)](https://webperso.info.ucl.ac.be/~pvr/VanRoyChapter.pdf).**
 1. CAP Twelve Years Later: How the "Rules" Have Changed. [Brewer (2012)](https://sites.cs.ucsb.edu/~rich/class/cs293b-cloud/papers/brewer-cap.pdf).
-1. **Thinking Methodically about Performance. [Gregg (2012)](https://queue.acm.org/detail.cfm?id=2413037).**
 1. **A Few Useful Things to Know About Machine Learning. [Domingos (2012)](https://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf).**
-1. ImageNet Classification with Deep Convolutional Neural Networks. [Krizhevsky, Sutskever, Hinton (2012)](https://papers.nips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf).
+1. ImageNet Classification with Deep Convolutional Neural Networks. [Krizhevsky, Sutskever, Hinton (2012)](https://www.cs.cmu.edu/~epxing/Class/10715-14f/reading/imagenet.pdf).
 1. Playing Atari with Deep Reinforcement Learning. [Mnih et al (2013)](https://arxiv.org/pdf/1312.5602.pdf).
 1. The Network is Reliable. [Bailis,  Kingsbury (2014)](https://queue.acm.org/detail.cfm?id=2655736).
 1. In Search of an Understandable Consensus Algorithm. [Ongaro, Ousterhout (2014)](https://raft.github.io/raft.pdf).
