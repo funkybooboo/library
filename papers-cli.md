@@ -2,6 +2,21 @@
 
 A command-line tool for tracking your reading progress on academic papers and downloading their PDFs. It reads `papers.yml` (the list of papers and their related papers), produces a flattened `papers_progress.yml` where each paper has a unique ID and tracked progress, and can bulk-download every PDF.
 
+## Quick reference
+
+```bash
+./papers-cli init                          # build papers_progress.yml (assigns IDs)
+./papers-cli list [--status ip]            # list papers / filter by status
+./papers-cli set --id 3 --status ip --page 42   # update one paper's progress
+./papers-cli download                      # bulk-download all PDFs -> papers/<topic>/
+./papers-cli download 3                    # download one paper by ID -> cwd/
+./papers-cli open failed                   # open failed URLs in your browser (ACM/Cloudflare)
+./papers-cli open all                      # open every paper link URL in your browser
+./papers-cli open downloaded [--topic X]    # open papers/ (or one topic) in your file manager
+./check_links.py                           # audit every link is reachable (CI-friendly)
+./gen_readme.py > README.md                # regenerate README from papers.yml (run after edits)
+```
+
 ## Requirements
 
 - **uv** -- the only prerequisite. Each script is self-contained: its Python dependencies (`pyyaml`, `requests`) are declared in a PEP 723 inline `# /// script` block at the top of the file, so uv provisions an isolated environment automatically the first time you run it (cached under `~/.cache/uv`). No virtualenv, no `pip install`, no `pyproject.toml`/lockfile to maintain.
@@ -89,7 +104,7 @@ At the end it writes `papers/index.md` (a topic-grouped list of successes) and `
 ./papers-cli download --id 3     # equivalent form
 ```
 
-Note: links on `dl.acm.org` (the ACM Digital Library) sit behind Cloudflare's "Just a moment..." JavaScript challenge, so any CLI downloader gets HTTP 403. These papers will appear in `papers/failed.md`; use `open-failed` (below) to fetch them in your browser.
+Note: links on `dl.acm.org` (the ACM Digital Library) sit behind Cloudflare's "Just a moment..." JavaScript challenge, so any CLI downloader gets HTTP 403. These papers appear in `papers/failed.md`; use `./papers-cli open failed` (see section 6) to fetch them in your browser.
 
 ### 6. Open URLs/files in your browser
 
