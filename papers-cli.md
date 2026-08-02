@@ -91,17 +91,34 @@ At the end it writes `papers/index.md` (a topic-grouped list of successes) and `
 
 Note: links on `dl.acm.org` (the ACM Digital Library) sit behind Cloudflare's "Just a moment..." JavaScript challenge, so any CLI downloader gets HTTP 403. These papers will appear in `papers/failed.md`; use `open-failed` (below) to fetch them in your browser.
 
-### 6. Open failed downloads in your browser
+### 6. Open URLs/files in your browser
 
-Parses `papers/failed.md` (written by `download all`) and opens every failed URL in your default browser in small batches. This is the way to get the ACM/Cloudflare-gated papers: a real browser solves the JS challenge, and for any paywalled ones you're entitled to via your institution, your browser session carries the access.
+The `open` command launches things in your default browser or file manager. Three targets:
+
+**`open failed`** (the default) parses `papers/failed.md` and opens every failed URL in your browser in small batches. This is the way to get the ACM/Cloudflare-gated papers: a real browser solves the JS challenge, and for any paywalled ones your institution entitles you to, your browser session carries the access.
 ```bash
-./papers-cli open-failed                 # open every failed URL
-./papers-cli open-failed --dry-run       # just list the URLs, don't launch
-./papers-cli open-failed --batch 10      # open 10 tabs per batch (default 8)
-./papers-cli open-failed --pause 2       # seconds between batches (default 1.5)
-./papers-cli open-failed --file other.md # use a different failed.md
+./papers-cli open failed                 # default target; open every failed URL
+./papers-cli open failed --dry-run       # just list them
+./papers-cli open failed --batch 10      # open 10 tabs per batch (default 8)
+./papers-cli open failed --pause 2       # seconds between batches (default 1.5)
+./papers-cli open failed --file other.md # use a different failed.md
 ```
-Each PDF renders in-browser; save it (Ctrl+S, or the download button) into `papers/<topic>/` if you want it on disk. After you've manually saved some ACM PDFs, re-running `./papers-cli download` will skip them (they're already present) and `open-failed` will show a shorter list. To refresh `failed.md`, delete `papers/failed.md` and re-run `./papers-cli download`.
+
+**`open all`** opens every paper link URL from `papers.yml` (flattened, deduped) in your browser -- useful for browsing the source pages directly.
+```bash
+./papers-cli open all
+./papers-cli open all --dry-run
+```
+
+**`open downloaded`** opens the `papers/` folder in your file manager so you can browse the PDFs already on disk. Use `--topic` to open a single topic subdir.
+```bash
+./papers-cli open downloaded                       # open papers/ in file manager
+./papers-cli open downloaded --topic Computer_History  # just that subdir
+./papers-cli open downloaded --dry-run
+```
+Tip: to open a single PDF, double-click it in your file manager, or run `xdg-open papers/<topic>/<title>.pdf`.
+
+After you've manually saved some ACM PDFs into `papers/<topic>/`, re-running `./papers-cli download` will skip them (already on disk) and `open failed` will show a shorter list. To refresh `failed.md`, delete `papers/failed.md` and re-run `./papers-cli download`.
 
 ## Commands Overview
 
@@ -110,7 +127,7 @@ Each PDF renders in-browser; save it (Ctrl+S, or the download button) into `pape
 - **set** -- Update a paper's status by ID. Options: `--status`, `--start_date`, `--finished_date`, `--page`. Aliases: `ns`, `ip`, `d`.
 - **list** -- List papers and progress; `--status` filters (full name or alias).
 - **download** -- `download all` (default) bulk-downloads every PDF into `papers/<topic>/<title>.pdf`, dedupes by link, skips files on disk, retries with a referer fallback, and writes `papers/index.md` + `papers/failed.md`. `download <id>` (or `download --id <id>`) downloads one paper to the current directory. `--jobs`/`-j` sets parallelism (default 6).
-- **open-failed** -- Open every URL in `papers/failed.md` in your browser, batched. `--dry-run`, `--batch`, `--pause`, `--file`.
+- **open** -- `open failed` (default) opens failed.md URLs in your browser; `open all` opens every paper link URL from `papers.yml`; `open downloaded` opens the `papers/` folder in your file manager (`--topic` narrows to a subdir). URL opens are batched (`--batch`/`--pause`); `--dry-run` lists without launching. The path for ACM/Cloudflare-gated papers a CLI can't fetch.
 
 ## Companion scripts
 
@@ -156,6 +173,6 @@ After `init`, this contains the flattened list (including related papers, each w
 - **`ModuleNotFoundError`** -- you're running the script with plain `python`/`python3` instead of through uv. Run it directly (`./papers-cli ...`) so the `uv run --script` shebang provisions the deps, or invoke `uv run --script papers-cli ...`.
 - **`env: 'uv': No such file or directory`** -- uv isn't on `PATH`. Install it (see Requirements) or, with mise, ensure your shell loads the shims.
 - **`uv run was recursively invoked ...` (shebang) on a renamed/extensionless copy** -- the inline `# /// script` block is what tells uv this is a self-contained script. Keep that block intact, and make sure no prose comment in the file literally contains the string `# /// script` (uv's scanner will mistake it for a second metadata opener and fail to provision).
-- **`open-failed` says "No failed URLs recorded" even though downloads failed** -- you need a current `papers/failed.md`. Run `./papers-cli download` first; the file is written at the end of a bulk download.
+- **`open failed` says "No failed URLs recorded" even though downloads failed** -- you need a current `papers/failed.md`. Run `./papers-cli download` first; the file is written at the end of a bulk download.
 - **File Not Found** -- run from the repo root so `papers.yml` is in the current directory.
 - **Invalid Status / Invalid Page** -- `set` accepts only `ns`/`ip`/`d` (or the full names), and `--page` must be an integer.

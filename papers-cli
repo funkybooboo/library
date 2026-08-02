@@ -424,22 +424,13 @@ def download_paper(paper_id):
         print(f"Error downloading paper: {e}")
 
 
-def open_failed(failed_path=None, batch=8, pause=1.5, dry_run=False):
-    """
-    Read papers/failed.md (written by 'download all'), open every failed URL
-    in the user's default browser in small batches so the browser can solve
-    Cloudflare/login challenges that the CLI can't. ACM 403s are the usual case.
-    Parses the controlled failed.md format, so it stays in sync with download.
-    """
-    path = failed_path or os.path.join(DOWNLOAD_DIR, "failed.md")
-    if not os.path.exists(path):
-        print(f"{path} not found -- run './papers-cli download' first to generate it.")
+def _collect_failed_urls(failed_path):
+    """Parse papers/failed.md -> list of (title, url) pairs."""
+    if not os.path.exists(failed_path):
+        print(f"{failed_path} not found -- run './papers-cli download' first to generate it.")
         return []
-    # Line-based scan: grab each '  - URL: <url>' line, paired with the most
-    # recent '- **title** (status)' line above it. Robust to the Category line
-    # written between them and to trailing Reason lines.
     titles = []
-    for line in open(path):
+    for line in open(failed_path):
         m = re.match(r"^- \*\*(.+?)\*\* \((\w+)\)", line)
         if m:
             titles.append(m.group(1))
@@ -447,12 +438,33 @@ def open_failed(failed_path=None, batch=8, pause=1.5, dry_run=False):
         m = re.match(r"^\s*- URL: <(.+?)>", line)
         if m:
             titles.append(m.group(1))
-    # titles now alternates: title, url, title, url, ...
-    pairs = list(zip(titles[0::2], titles[1::2]))
-    if not pairs:
-        print(f"No failed URLs recorded in {path}.")
+    # titles alternates: title, url, title, url, ...
+    return list(zip(titles[0::2], titles[1::2]))
+
+
+def _collect_all_links():
+    """Read papers.yml (flattened, deduped by link) -> list of (title, url) pairs."""
+    if not os.path.exists(PAPERS_FILE):
+        print(f"{PAPERS_FILE} not found.")
         return []
-    print(f"Opening {len(pairs)} failed-download URL{'s' if len(pairs)!=1 else ''} from {path}...")
+    with open(PAPERS_FILE) as f:
+        papers = flatten_with_topics(yaml.safe_load(f))
+    seen, pairs = set(), []
+    for p in papers:
+        link = p.get("link")
+        if not link or link in seen:
+            continue
+        seen.add(link)
+        pairs.append((p.get("title", "untitled"), link))
+    return pairs
+
+
+def _open_urls(pairs, batch, pause, dry_run, label):
+    """Open a list of (title, url) pairs in the default browser, throttled."""
+    if not pairs:
+        print(f"No {label} to open.")
+        return []
+    print(f"Opening {len(pairs)} {label}{'s' if len(pairs)!=1 else ''} in your browser...")
     if dry_run:
         for t, u in pairs:
             print(f"  [dry-run] {t}  ->  {u}")
@@ -465,15 +477,73 @@ def open_failed(failed_path=None, batch=8, pause=1.5, dry_run=False):
             opened.append(url)
         except Exception as e:
             print(f"    -> couldn't open: {e}")
-        # Throttle so we don't fire dozens of tabs at once (ACM/Cloudflare
-        # rate-limits; browsers also choke on opening 40+ tabs instantly).
+        # Throttle: ACM/Cloudflare rate-limits and browsers choke opening 40+ tabs
+        # at once, so pause briefly between batches.
         if i % batch == 0 and i < len(pairs):
             print(f"    (batch {i // batch} opened; pausing {pause}s before the next...)")
             time.sleep(pause)
-    print(f"\nOpened {len(opened)} URLs in your browser.")
-    print("Each PDF will render in-browser; save it (Ctrl+S -> Save as PDF) into "
+    print(f"\nOpened {len(opened)} URLs.")
+    print("Each PDF renders in-browser; save it (Ctrl+S -> Save as PDF) into "
           "papers/<topic>/ if you want it on disk, or just read it online.")
     return opened
+
+
+def open_target(target, failed_path=None, batch=8, pause=1.5, dry_run=False, topic=None):
+    """
+    General 'open' command. Targets:
+      - failed     : URLs from papers/failed.md (solve Cloudflare/login challenges in a real browser)
+      - all        : every paper link URL from papers.yml
+      - downloaded : the papers/ folder (or a single topic subdir with --topic) in your file manager
+                   so you can browse the PDFs already on disk
+    """
+    if target == "failed":
+        path = failed_path or os.path.join(DOWNLOAD_DIR, "failed.md")
+        pairs = _collect_failed_urls(path)
+        if not pairs:
+            print(f"No failed URLs recorded in {path}.")
+            return []
+        return _open_urls(pairs, batch, pause, dry_run, "failed-download URL")
+
+    if target == "all":
+        pairs = _collect_all_links()
+        if not pairs:
+            print(f"No links found in {PAPERS_FILE}.")
+            return []
+        return _open_urls(pairs, batch, pause, dry_run, "paper URL")
+
+    if target == "downloaded":
+        if not os.path.isdir(DOWNLOAD_DIR):
+            print(f"{DOWNLOAD_DIR}/ not found -- run './papers-cli download' first.")
+            return []
+        target_dir = os.path.join(DOWNLOAD_DIR, topic) if topic else DOWNLOAD_DIR
+        if not os.path.isdir(target_dir):
+            print(f"{target_dir} not found.")
+            return []
+        count = sum(1 for _ in _iter_pdfs(target_dir))
+        if dry_run:
+            print(f"[dry-run] would open {target_dir} ({count} PDF{'s' if count!=1 else ''} inside)")
+            return [target_dir]
+        print(f"Opening {target_dir} ({count} PDF{'s' if count!=1 else ''} inside) in your file manager...")
+        try:
+            # webbrowser.open on a local path -> xdg-open -> default file manager.
+            webbrowser.open(f"file://{os.path.abspath(target_dir)}")
+        except Exception as e:
+            print(f"    -> couldn't open: {e}")
+            return []
+        print("Tip: to open a single PDF, just double-click it in your file manager, "
+              "or run 'xdg-open papers/<topic>/<title>.pdf'.")
+        return [target_dir]
+
+    print(f"Unknown open target {target!r}. Use: failed, all, or downloaded.")
+    return []
+
+
+def _iter_pdfs(root):
+    """Yield every *.pdf under root (recursive)."""
+    for dirpath, _dirs, files in os.walk(root):
+        for name in sorted(files):
+            if name.lower().endswith(".pdf"):
+                yield os.path.join(dirpath, name)
 
 
 def main():
@@ -510,14 +580,22 @@ def main():
         "--jobs", "-j", type=int, default=6,
         help="Parallel workers for 'download all' (default: 6)")
 
-    # open-failed: open every URL from papers/failed.md in the default browser
-    # (for Cloudflare/login-walled hosts like dl.acm.org the CLI can't bypass).
+    # open: open URLs/files in the browser or file manager.
     parser_open = subparsers.add_parser(
-        "open-failed",
-        help="Open every failed-download URL from papers/failed.md in your browser")
+        "open",
+        help="Open URLs or downloaded PDFs: 'open failed', 'open all', 'open downloaded'")
+    parser_open.add_argument(
+        "target", nargs="?", default="failed",
+        choices=["failed", "all", "downloaded"],
+        help="'failed' (default) opens failed.md URLs in your browser; "
+             "'all' opens every paper link URL from papers.yml; "
+             "'downloaded' opens the papers/ folder in your file manager")
     parser_open.add_argument(
         "--file", default=None,
-        help=f"Path to a failed.md (default: {DOWNLOAD_DIR}/failed.md)")
+        help=f"Path to a failed.md (only with 'open failed'; default: {DOWNLOAD_DIR}/failed.md)")
+    parser_open.add_argument(
+        "--topic", default=None,
+        help="With 'open downloaded', open just this topic subdir (e.g. 'Computer_History')")
     parser_open.add_argument(
         "--batch", type=int, default=8,
         help="Open this many tabs per batch, then pause briefly (default: 8)")
@@ -526,7 +604,7 @@ def main():
         help="Seconds to pause between batches (default: 1.5)")
     parser_open.add_argument(
         "--dry-run", action="store_true",
-        help="Just list the URLs that would be opened, don't launch the browser")
+        help="Just list what would be opened, don't launch anything")
 
     args = parser.parse_args()
 
@@ -548,8 +626,8 @@ def main():
                 download_paper(int(args.target))
             except ValueError:
                 parser_download.error(f"download target must be 'all' or a paper ID, got {args.target!r}")
-    elif args.command == "open-failed":
-        open_failed(args.file, args.batch, args.pause, args.dry_run)
+    elif args.command == "open":
+        open_target(args.target, args.file, args.batch, args.pause, args.dry_run, args.topic)
     else:
         parser.print_help()
 
