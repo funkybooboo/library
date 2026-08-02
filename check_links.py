@@ -21,11 +21,35 @@ urllib3.disable_warnings()
 
 
 HEADERS = {'User-Agent': 'My User Agent 1.0'}
+TIMEOUT = 20  # seconds per request; a hung host won't stall the whole run
+TRANSIENT = (
+    requests.exceptions.ConnectionError,
+    requests.exceptions.Timeout,
+    requests.exceptions.ChunkedEncodingError,
+)
+
+
+def fetch(link):
+    """HEAD the link, fall back to GET on 405. Retry once on transient errors."""
+    for attempt in (1, 2):
+        try:
+            response = requests.head(link, headers=HEADERS, verify=False, timeout=TIMEOUT,
+                                     allow_redirects=True)
+            if response.status_code == 405:
+                response = requests.get(link, headers=HEADERS, verify=False, timeout=TIMEOUT,
+                                       stream=True)
+            return response
+        except TRANSIENT as e:
+            if attempt == 2:
+                raise
+            last = e
+    raise last  # unreachable; keeps linters calm
+
 
 with open('papers.yml') as file_:
     papers = yaml.safe_load(file_)
 
-for paper in papers:
+for paper in list(papers):
     papers += paper.get('related', [])
 
 
@@ -42,14 +66,19 @@ for paper in papers:
         print('skipping ACM')
         continue
 
-    response = requests.head(paper['link'], headers=HEADERS, verify=False)
-    if response.status_code == 405:
-        response = requests.get(paper['link'], headers=HEADERS, verify=False)
+    try:
+        response = fetch(paper['link'])
+    except requests.exceptions.RequestException as e:
+        exit_code = 1
+        print(f' ERROR ({type(e).__name__})')
+        print(f'    failed fetching {paper["link"]}')
+        continue
+
     if response.ok:
         print('ok')
     else:
         exit_code = 1
-        print(' ERROR')
+        print(f' ERROR ({response.status_code})')
         print(f'    failed fetching {paper["link"]}')
 
 exit(exit_code)
