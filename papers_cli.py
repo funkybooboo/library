@@ -1,5 +1,5 @@
 #!/usr/bin/env -S uv run
-# CLI for managing paper reading progress.
+# CLI for managing paper reading progress and downloading PDFs.
 # deps (pyyaml, requests) are declared inline below; uv provisions them
 # automatically the first time you run this script.
 
@@ -12,6 +12,7 @@
 # ///
 
 import argparse
+import concurrent.futures
 import datetime
 import os
 import re
@@ -21,6 +22,7 @@ import requests
 # File names
 PAPERS_FILE = "papers.yml"
 PROGRESS_FILE = "papers_progress.yml"
+DOWNLOAD_DIR = "papers"
 
 # Mapping of aliases to full status strings
 STATUS_ALIASES = {
@@ -29,12 +31,21 @@ STATUS_ALIASES = {
     "d": "read"
 }
 
+# Browser-like headers so paper hosts don't 403/redirect to a login page.
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; rv:112.0) Gecko/20100101 Firefox/112.0"
+PDF_HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept": "application/pdf,*/*;q=0.8",
+}
+
+
 def sanitize_filename(s):
     """
     Create a safe filename from a given string.
     Replaces spaces with underscores and removes unsafe characters.
     """
     return re.sub(r'(?u)[^-\w.]', '', s.strip().replace(" ", "_"))
+
 
 def flatten_papers(papers):
     """
@@ -56,6 +67,27 @@ def flatten_papers(papers):
                 flat_list.append(related_copy)
     return flat_list
 
+
+def flatten_with_topics(papers):
+    """
+    Like flatten_papers, but each related paper inherits its parent's 'topics'
+    (used by 'download all' to organize PDFs under papers/<topic>/).
+    """
+    flat_list = []
+    for paper in papers:
+        main_paper = paper.copy()
+        related = main_paper.pop("related", None)
+        topics = main_paper.get("topics") or []
+        flat_list.append(main_paper)
+        if isinstance(related, list):
+            for r in related:
+                rc = r.copy()
+                rc["parent_title"] = paper.get("title")
+                rc["topics"] = topics
+                flat_list.append(rc)
+    return flat_list
+
+
 def assign_ids(papers):
     """
     Assign a unique numeric id to each paper if not already present.
@@ -64,6 +96,7 @@ def assign_ids(papers):
         if "id" not in paper:
             paper["id"] = idx
     return papers
+
 
 def load_papers():
     """
@@ -89,9 +122,11 @@ def load_papers():
         save_papers(papers)
     return papers
 
+
 def save_papers(papers):
     with open(PROGRESS_FILE, "w") as f:
         yaml.safe_dump(papers, f)
+
 
 def init_papers():
     """
@@ -115,6 +150,7 @@ def init_papers():
     save_papers(papers)
     print(f"Initialized {PROGRESS_FILE} from {PAPERS_FILE} with paper IDs (including related papers).")
 
+
 def reset_papers():
     """
     Reset progress for all papers to default (not started).
@@ -131,6 +167,7 @@ def reset_papers():
     save_papers(papers)
     print("Reset progress for all papers.")
 
+
 def set_paper_status(paper_id, status, start_date=None, finished_date=None, current_page=None):
     """
     Set the progress status for a given paper by id.
@@ -139,7 +176,6 @@ def set_paper_status(paper_id, status, start_date=None, finished_date=None, curr
     Supports aliases: 'ns' for not started, 'ip' for in progress, and 'd' for read.
     Optionally, sets the current page the user is on.
     """
-    # Convert aliases to full status strings if applicable
     status = STATUS_ALIASES.get(status.lower(), status).lower()
 
     papers = load_papers()
@@ -178,6 +214,7 @@ def set_paper_status(paper_id, status, start_date=None, finished_date=None, curr
         save_papers(papers)
         print(f"Updated status for paper ID: {paper_id}")
 
+
 def list_papers(status_filter=None):
     """
     List papers, optionally filtering by progress status.
@@ -205,10 +242,156 @@ def list_papers(status_filter=None):
     if count == 0:
         print("No papers found with the specified filter.")
 
+
+def fetch_pdf(link, timeout=30):
+    """
+    GET the PDF at `link` with browser-like headers. Two attempts: first with
+    the link itself as Referer, then with a Google Referer (some hosts require
+    a referring page). Returns the raw bytes on success, raises RuntimeError on
+    failure. Mirrors the retry logic of download_papers.sh (curl-referer then
+    curl-google-referer) without shelling out.
+    """
+    last_err = "unknown"
+    for referer in (link, "https://www.google.com/"):
+        try:
+            resp = requests.get(link, headers={**PDF_HEADERS, "Referer": referer},
+                                timeout=timeout, stream=True)
+            if resp.ok:
+                return resp.content
+            last_err = f"HTTP {resp.status_code}"
+        except requests.RequestException as e:
+            last_err = f"{type(e).__name__}: {e}"
+    raise RuntimeError(last_err)
+
+
+def _is_pdf(data):
+    """True if the bytes start with the PDF magic. Catches HTML login-wall pages."""
+    return data[:4] == b'%PDF'
+
+
+def download_one(paper, jobs_label=""):
+    """
+    Download a single paper dict (with topics/title/link) into
+    papers/<topic>/<title>.pdf. Skip if already present. Returns a result
+    tuple: (topic_slug, title_slug, title, link, status, dest, reason).
+    status in {"ok","skip","warn","fail"}.
+    """
+    title = paper.get("title", "untitled")
+    link = paper.get("link")
+    if not link:
+        return ("", "", title, "", "fail", "", "no link")
+    topics = paper.get("topics") or ["Uncategorized"]
+    topic_slug = sanitize_filename(topics[0])
+    title_slug = sanitize_filename(title)
+    topic_dir = os.path.join(DOWNLOAD_DIR, topic_slug)
+    os.makedirs(topic_dir, exist_ok=True)
+    dest = os.path.join(topic_dir, title_slug + ".pdf")
+
+    if os.path.exists(dest):
+        return (topic_slug, title_slug, title, link, "skip", dest, "already downloaded")
+
+    try:
+        data = fetch_pdf(link)
+    except Exception as e:
+        return (topic_slug, title_slug, title, link, "fail", dest, str(e))
+
+    if not _is_pdf(data):
+        return (topic_slug, title_slug, title, link, "warn", dest,
+                "response was not a PDF (likely an HTML login/interstitial page)")
+
+    with open(dest, "wb") as f:
+        f.write(data)
+    return (topic_slug, title_slug, title, link, "ok", dest, "")
+
+
+def download_all(jobs=6):
+    """
+    Bulk-download every PDF in papers.yml (including related papers) into
+    papers/<topic>/<title>.pdf, organized by the paper's first topic. Dedupes
+    by link, skips already-downloaded files, retries with a referer trick, and
+    writes papers/index.md + papers/failed.md at the end. Replaces
+    download_papers.sh.
+    """
+    if not os.path.exists(PAPERS_FILE):
+        print(f"{PAPERS_FILE} not found.")
+        return
+
+    with open(PAPERS_FILE, "r") as f:
+        papers = yaml.safe_load(f)
+    flat = flatten_with_topics(papers)
+
+    # Dedupe by link (same paper can appear as related to several parents).
+    seen = set()
+    queue = []
+    for p in flat:
+        link = p.get("link")
+        if not link or link in seen:
+            continue
+        seen.add(link)
+        queue.append(p)
+
+    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+    total = len(queue)
+    print(f"Downloading {total} papers into {DOWNLOAD_DIR}/<topic>/ ({jobs} parallel)...")
+
+    results = []
+    markers = {"ok": "OK  ", "skip": "skip", "warn": "WARN", "fail": "FAIL"}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as ex:
+        futs = {ex.submit(download_one, p): p for p in queue}
+        done = 0
+        for fut in concurrent.futures.as_completed(futs):
+            done += 1
+            res = fut.result()
+            results.append(res)
+            topic_slug, title_slug, title, link, status, dest, reason = res
+            print(f"[{done}/{total}] {markers[status]} {title}")
+            if reason and status in ("warn", "fail"):
+                print(f"        -> {reason}")
+
+    _write_download_indexes(results)
+    n_ok = sum(1 for r in results if r[4] == "ok")
+    n_skip = sum(1 for r in results if r[4] == "skip")
+    n_warn = sum(1 for r in results if r[4] == "warn")
+    n_fail = sum(1 for r in results if r[4] == "fail")
+    print(f"\nDone: {n_ok} downloaded, {n_skip} already present, {n_warn} not-PDF, {n_fail} failed.")
+    print(f"Index: {DOWNLOAD_DIR}/index.md   Failures: {DOWNLOAD_DIR}/failed.md")
+
+
+def _write_download_indexes(results):
+    """Write papers/index.md (successes) and papers/failed.md (warns + fails).."""
+    index_path = os.path.join(DOWNLOAD_DIR, "index.md")
+    failed_path = os.path.join(DOWNLOAD_DIR, "failed.md")
+
+    successes = sorted((r for r in results if r[4] in ("ok", "skip")),
+                       key=lambda r: (r[0], r[1]))
+    with open(index_path, "w") as f:
+        f.write("# Downloaded Papers\n\n")
+        current = ""
+        for topic_slug, title_slug, title, link, status, dest, reason in successes:
+            if topic_slug != current:
+                if current:
+                    f.write("\n")
+                f.write(f"## {topic_slug}\n\n")
+                current = topic_slug
+            rel = os.path.relpath(dest, DOWNLOAD_DIR)
+            f.write(f"- [{title}]({rel})\n")
+
+    failures = [r for r in results if r[4] in ("warn", "fail")]
+    with open(failed_path, "w") as f:
+        f.write("# Failed Downloads (manual)\n\n")
+        if not failures:
+            f.write("None -- every download succeeded.\n")
+        for topic_slug, title_slug, title, link, status, dest, reason in failures:
+            f.write(f"- **{title}** ({status})\n")
+            f.write(f"  - Category: `{topic_slug}`\n")
+            f.write(f"  - URL: <{link}>\n")
+            f.write(f"  - Reason: {reason}\n\n")
+
+
 def download_paper(paper_id):
     """
-    Download the PDF for the paper with the given id.
-    The PDF is saved using a sanitized version of the paper's title.
+    Download the PDF for a single paper by its progress-file ID, saving it to
+    the current directory as <sanitized-title>.pdf.
     """
     papers = load_papers()
     paper = next((p for p in papers if p.get("id") == paper_id), None)
@@ -221,43 +404,52 @@ def download_paper(paper_id):
         return
     title = paper.get("title", f"paper_{paper_id}")
     filename = sanitize_filename(title) + ".pdf"
+    print(f"Downloading '{title}' from {link} ...")
     try:
-        print(f"Downloading '{title}' from {link} ...")
-        response = requests.get(link, stream=True)
-        response.raise_for_status()
-        with open(filename, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
+        data = fetch_pdf(link)
+        if not _is_pdf(data):
+            print(f"Error: response from {link} was not a PDF (likely an HTML page).")
+            return
+        with open(filename, "wb") as f:
+            f.write(data)
         print(f"Downloaded and saved to {filename}")
     except Exception as e:
         print(f"Error downloading paper: {e}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description="CLI for managing paper reading progress using paper IDs")
+    parser = argparse.ArgumentParser(description="CLI for managing paper reading progress and downloading PDFs")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
 
-    # init: Initialize progress file from papers.yml (including related papers)
-    parser_init = subparsers.add_parser("init", help="Initialize the papers_progress.yml file from papers.yml")
+    parser_init = subparsers.add_parser("init", help="Initialize papers_progress.yml from papers.yml")
 
-    # reset: Reset progress for all papers
     parser_reset = subparsers.add_parser("reset", help="Reset progress on all papers to 'not started'")
 
-    # set: Update the status of a paper by ID (with optional current page)
     parser_set = subparsers.add_parser("set", help="Set the status for a paper by ID")
     parser_set.add_argument("--id", required=True, type=int, help="ID of the paper to update")
     parser_set.add_argument("--status", required=True, help="Status to set (not started/ns, in progress/ip, read/d)")
-    parser_set.add_argument("--start_date", help="Optional start date (YYYY-MM-DD) for 'in progress' or 'read' statuses")
-    parser_set.add_argument("--finished_date", help="Optional finished date (YYYY-MM-DD) for 'read' status")
-    parser_set.add_argument("--page", help="Optional current page number you are at", type=int)
+    parser_set.add_argument("--start_date", help="Start date (YYYY-MM-DD) for 'in progress' or 'read'")
+    parser_set.add_argument("--finished_date", help="Finished date (YYYY-MM-DD) for 'read'")
+    parser_set.add_argument("--page", help="Current page number", type=int)
 
-    # list: View papers by progress status (optional filter)
     parser_list = subparsers.add_parser("list", help="List papers by progress status")
-    parser_list.add_argument("--status", help="Filter papers by status (not started/ns, in progress/ip, read/d)")
+    parser_list.add_argument("--status", help="Filter by status (not started/ns, in progress/ip, read/d)")
 
-    # download: Download the PDF for a paper by ID
-    parser_download = subparsers.add_parser("download", help="Download the PDF for a paper by ID")
-    parser_download.add_argument("--id", required=True, type=int, help="ID of the paper to download")
+    # download: one paper by ID, or all papers (bulk).
+    parser_download = subparsers.add_parser(
+        "download",
+        help="Download PDFs: 'download all' (bulk, into papers/<topic>/) or 'download <id>' (one, into cwd)")
+    parser_download.add_argument(
+        "target", nargs="?", default="all",
+        help="'all' (default) to bulk-download every paper into papers/<topic>/, "
+             "or a paper ID to download one paper to the current directory")
+    parser_download.add_argument(
+        "--id", type=int,
+        help="Paper ID to download (alternative to the positional target). "
+             "Downloaded to the current directory as <title>.pdf")
+    parser_download.add_argument(
+        "--jobs", "-j", type=int, default=6,
+        help="Parallel workers for 'download all' (default: 6)")
 
     args = parser.parse_args()
 
@@ -270,9 +462,18 @@ def main():
     elif args.command == "list":
         list_papers(args.status)
     elif args.command == "download":
-        download_paper(args.id)
+        if args.id is not None:
+            download_paper(args.id)
+        elif str(args.target).lower() == "all":
+            download_all(args.jobs)
+        else:
+            try:
+                download_paper(int(args.target))
+            except ValueError:
+                parser_download.error(f"download target must be 'all' or a paper ID, got {args.target!r}")
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

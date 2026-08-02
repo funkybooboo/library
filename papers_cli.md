@@ -107,14 +107,23 @@ python papers_cli.py list --status ip
 
 ### 5. Downloading PDFs
 
-Download the PDF for a paper using its unique ID. The CLI fetches the PDF from the paper's link and saves it using a sanitized version of the paper’s title as the filename.
+The `download` subcommand does two things:
 
-Example:
+**Download every PDF (bulk)** into `papers/<topic>/<title>.pdf`, organized by each paper's first topic. Related papers inherit their parent's topic. Links are deduped, already-downloaded files are skipped, and fetches use browser headers + a referer fallback so hosts that block hotlinking still work. Responses that aren't actually PDFs (HTML login walls / interstitials) are detected and reported rather than saved as fake PDFs.
 ```bash
-python papers_cli.py download --id 3
+./papers_cli.py download all        # bulk download; default target is 'all'
+./papers_cli.py download            # shorthand for 'download all'
+./papers_cli.py download all -j 8   # 8 parallel workers (default 6)
+```
+At the end it writes `papers/index.md` (a topic-grouped list of what succeeded) and `papers/failed.md` (WARN + FAIL entries with the URL and reason). Re-running skips files already on disk, so it's safe to resume.
+
+**Download one PDF** by its paper ID, saved to the current directory as `<title>.pdf`:
+```bash
+./papers_cli.py download 3          # by positional ID
+./papers_cli.py download --id 3    # equivalent (kept for back-compat)
 ```
 
-If the paper has a valid URL, the PDF will be downloaded into the current directory.
+Note: links on `dl.acm.org` (the ACM Digital Library) return HTTP 403 to non-JavaScript clients, so they will show up in `papers/failed.md`. This is a known limitation of any CLI downloader; those papers need a browser (or a JS-enabled fetch). Every other reachable host downloads fine.
 
 ## Commands Overview
 
@@ -135,7 +144,7 @@ If the paper has a valid URL, the PDF will be downloaded into the current direct
   Lists the papers with all progress information, including current page. You can filter the list by status using either full names or aliases.
 
 - **download**:  
-  Downloads the PDF for a specified paper using its ID.
+  `download all` (the default) bulk-downloads every PDF in `papers.yml` into `papers/<topic>/<title>.pdf`, dedupes by link, skips files already on disk, retries with a referer fallback, and writes `papers/index.md` + `papers/failed.md`. `download <id>` (or `download --id <id>`) downloads a single paper to the current directory. Parallelism via `--jobs` (default 6). Replaces the old `download_papers.sh`.
 
 ## YAML File Structure
 
