@@ -1,6 +1,12 @@
 # Papers Progress CLI
 
-The **Papers Progress CLI** is a command-line tool that helps you track your reading progress on academic papers. It reads an input YAML file (`papers.yml`) containing your papers (and their related papers) and produces a flattened progress file (`papers_progress.yml`) where each paper is assigned a unique ID and its reading progress is tracked. You can update the status, set the current page you're on, list papers, download PDFs, and more—all using simple subcommands.
+The **Papers Progress CLI** is a command-line tool that helps you track your reading progress on academic papers. It reads an input YAML file (`papers.yml`) containing your papers (and their related papers) and produces a flattened progress file (`papers_progress.yml`) where each paper is assigned a unique ID and its reading progress is tracked. You can update the status, set the current page you're on, list papers, download PDFs, and more-all using simple subcommands.
+
+Run any command through `uv run` so dependencies are picked up from the project's locked environment (run `uv sync` first, or let `uv run` create the environment on demand):
+```bash
+uv run papers_cli.py init
+```
+All examples below assume the `uv run ` prefix (or that you have activated the `.venv` via `source .venv/bin/activate`).
 
 ## Features
 
@@ -16,15 +22,17 @@ The **Papers Progress CLI** is a command-line tool that helps you track your rea
 
 ## Requirements
 
-- **Python 3.6+**
-- **PyYAML:** Install with:
-  ```bash
-  pip install pyyaml
-  ```
-- **Requests:** Install with:
-  ```bash
-  pip install requests
-  ```
+- **Python >=3.12**
+- **uv** manages dependencies (pyyaml, requests, python-slugify) automatically via `pyproject.toml` / `uv.lock`.
+
+Install uv once (any one of these):
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh   # standalone installer (recommended)
+# or
+pip install --user uv
+# or (with mise)
+mise use -g uv@latest
+```
 
 ## Installation
 
@@ -34,6 +42,10 @@ The **Papers Progress CLI** is a command-line tool that helps you track your rea
    ```bash
    chmod +x papers_cli.py
    ```
+4. Sync dependencies (creates a local `.venv` and installs everything from the lockfile):
+  ```bash
+  uv sync
+  ```
 
 ## Usage
 
@@ -165,10 +177,7 @@ After initialization, this file will contain a flattened list of all papers (inc
 ## Troubleshooting
 
 - **Missing Dependencies:**  
-  If you encounter a `ModuleNotFoundError`, ensure PyYAML and Requests are installed:
-  ```bash
-  pip install pyyaml requests
-  ```
+  If you encounter a `ModuleNotFoundError`, run `uv sync` (or prefix the command with `uv run `) so the project's locked environment is used.
 - **File Not Found:**  
   Verify that `papers.yml` is in the same directory as `papers_cli.py`.
 - **Invalid Status:**  

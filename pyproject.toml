@@ -1,17 +1,18 @@
-[tool.poetry]
+[project]
 name = "papers"
 version = "0.1.0"
-description = ""
-authors = ["Nate Stott <nate.stott@pm.me>"]
+description = "Curated software-engineering papers: README generator, link checker, and reading-progress CLI."
+authors = [{name = "Nate Stott", email = "nate.stott@pm.me"}]
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml>=6.0.2",
+    "requests>=2.32.3",
+    "python-slugify>=8.0.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-pyyaml = "^6.0.2"
-requests = "^2.32.3"
-python-slugify = "^8.0.1"
+[tool.uv]
+package = false
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
+[dependency-groups]
+dev = []
