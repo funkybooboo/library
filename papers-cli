@@ -1,10 +1,8 @@
 #!/usr/bin/env -S uv run --script
-# CLI for managing paper reading progress and downloading PDFs.
-# Run directly: ./papers-cli <command> ...  (uv provisions deps from the
-# inline script-metadata block below -- the --script flag is needed because
-# this file has no .py extension, so uv can't infer it's a PEP 723 script).
-# deps (pyyaml, requests) are declared inline below; uv provisions them
-# automatically the first time you run this script.
+# Download and open the academic papers listed in papers.yml.
+# deps (pyyaml, requests) are declared in the inline script-metadata block
+# below; uv provisions them automatically the first time you run this.
+# Run directly: ./papers-cli <command> ...
 
 # /// script
 # requires-python = ">=3.12"
@@ -16,362 +14,130 @@
 
 import argparse
 import concurrent.futures
-import datetime
 import os
 import re
-import shlex
-import subprocess
 import time
 import webbrowser
 import yaml
 import requests
 
-# File names
 PAPERS_FILE = "papers.yml"
-PROGRESS_FILE = "papers_progress.yml"
 DOWNLOAD_DIR = "papers"
 
-# Mapping of aliases to full status strings
-STATUS_ALIASES = {
-    "ns": "not started",
-    "ip": "in progress",
-    "d": "read"
-}
-
-# Browser-like headers so paper hosts don't 403/redirect to a login page.
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; rv:112.0) Gecko/20100101 Firefox/112.0"
-PDF_HEADERS = {
-    "User-Agent": USER_AGENT,
-    "Accept": "application/pdf,*/*;q=0.8",
-}
+PDF_HEADERS = {"User-Agent": USER_AGENT, "Accept": "application/pdf,*/*;q=0.8"}
 
 
 def sanitize_filename(s):
-    """
-    Create a safe filename from a given string.
-    Replaces spaces with underscores and removes unsafe characters.
-    """
+    r"""Safe filename: spaces -> underscores, drop everything non [-\w.]."""
     return re.sub(r'(?u)[^-\w.]', '', s.strip().replace(" ", "_"))
 
 
-def flatten_papers(papers):
-    """
-    Flatten the list of papers to include all related papers as separate entries.
-    For each top-level paper, add the main paper (without its 'related' field)
-    and then add each related paper. For related papers, add a 'parent_title'
-    field to indicate from which paper they came.
-    """
-    flat_list = []
-    for paper in papers:
-        main_paper = paper.copy()
-        if "related" in main_paper:
-            del main_paper["related"]
-        flat_list.append(main_paper)
-        if "related" in paper and isinstance(paper["related"], list):
-            for related in paper["related"]:
-                related_copy = related.copy()
-                related_copy["parent_title"] = paper.get("title")
-                flat_list.append(related_copy)
-    return flat_list
-
-
 def flatten_with_topics(papers):
-    """
-    Like flatten_papers, but each related paper inherits its parent's 'topics'
-    (used by 'download all' to organize PDFs under papers/<topic>/).
-    """
-    flat_list = []
-    for paper in papers:
-        main_paper = paper.copy()
-        related = main_paper.pop("related", None)
-        topics = main_paper.get("topics") or []
-        flat_list.append(main_paper)
-        if isinstance(related, list):
-            for r in related:
-                rc = r.copy()
-                rc["parent_title"] = paper.get("title")
-                rc["topics"] = topics
-                flat_list.append(rc)
-    return flat_list
+    """Flatten papers + related into one list; related inherit the parent's
+    first topic (used to organize papers/<topic>/)."""
+    flat = []
+    for paper in papers or []:
+        main = paper.copy()
+        related = main.pop("related", None)
+        topics = main.get("topics") or []
+        flat.append(main)
+        for r in related or []:
+            rc = r.copy()
+            rc["parent_title"] = paper.get("title")
+            rc["topics"] = topics
+            flat.append(rc)
+    return flat
 
 
-def assign_ids(papers):
-    """
-    Assign a unique numeric id to each paper if not already present.
-    """
-    for idx, paper in enumerate(papers, start=1):
-        if "id" not in paper:
-            paper["id"] = idx
-    return papers
-
-
-def load_papers():
-    """
-    Load papers from the progress file if it exists;
-    otherwise load from papers.yml, flatten the list to include related papers,
-    assign ids, and add a default progress section.
-    """
-    if os.path.exists(PROGRESS_FILE):
-        with open(PROGRESS_FILE, "r") as f:
-            papers = yaml.safe_load(f)
-    else:
-        with open(PAPERS_FILE, "r") as f:
-            papers = yaml.safe_load(f)
-        papers = flatten_papers(papers)
-        papers = assign_ids(papers)
-        for paper in papers:
-            paper["progress"] = {
-                "status": "not started",
-                "start_date": None,
-                "finished_date": None,
-                "current_page": None
-            }
-        save_papers(papers)
-    return papers
-
-
-def save_papers(papers):
-    with open(PROGRESS_FILE, "w") as f:
-        yaml.safe_dump(papers, f)
-
-
-def init_papers():
-    """
-    Initialize the progress file from papers.yml.
-    This will flatten the papers, assign IDs, and add the default progress.
-    """
-    if os.path.exists(PROGRESS_FILE):
-        print(f"{PROGRESS_FILE} already exists.")
-        return
-    with open(PAPERS_FILE, "r") as f:
-        papers = yaml.safe_load(f)
-    papers = flatten_papers(papers)
-    papers = assign_ids(papers)
-    for paper in papers:
-        paper["progress"] = {
-            "status": "not started",
-            "start_date": None,
-            "finished_date": None,
-            "current_page": None
-        }
-    save_papers(papers)
-    print(f"Initialized {PROGRESS_FILE} from {PAPERS_FILE} with paper IDs (including related papers).")
-
-
-def reset_papers():
-    """
-    Reset progress for all papers to default (not started).
-    Clears start_date, finished_date, and current_page.
-    """
-    papers = load_papers()
-    for paper in papers:
-        paper["progress"] = {
-            "status": "not started",
-            "start_date": None,
-            "finished_date": None,
-            "current_page": None
-        }
-    save_papers(papers)
-    print("Reset progress for all papers.")
-
-
-def set_paper_status(paper_id, status, start_date=None, finished_date=None, current_page=None):
-    """
-    Set the progress status for a given paper by id.
-    For 'in progress', a start_date is recorded (default: today).
-    For 'read', a finished_date is recorded (default: today) and a start_date is set if not already.
-    Supports aliases: 'ns' for not started, 'ip' for in progress, and 'd' for read.
-    Optionally, sets the current page the user is on.
-    """
-    status = STATUS_ALIASES.get(status.lower(), status).lower()
-
-    papers = load_papers()
-    found = False
-    for paper in papers:
-        if paper.get("id") == paper_id:
-            found = True
-            if status not in ["not started", "in progress", "read"]:
-                print("Invalid status. Use 'not started' (or 'ns'), 'in progress' (or 'ip'), or 'read' (or 'd').")
-                return
-
-            paper["progress"]["status"] = status
-
-            if status == "in progress":
-                paper["progress"]["start_date"] = start_date or datetime.date.today().isoformat()
-                paper["progress"]["finished_date"] = None
-            elif status == "read":
-                if not paper["progress"].get("start_date"):
-                    paper["progress"]["start_date"] = start_date or datetime.date.today().isoformat()
-                paper["progress"]["finished_date"] = finished_date or datetime.date.today().isoformat()
-            elif status == "not started":
-                paper["progress"]["start_date"] = None
-                paper["progress"]["finished_date"] = None
-
-            if current_page is not None:
-                try:
-                    paper["progress"]["current_page"] = int(current_page)
-                except ValueError:
-                    print("Current page must be an integer.")
-                    return
-            break
-
-    if not found:
-        print(f"Paper with ID '{paper_id}' not found.")
-    else:
-        save_papers(papers)
-        print(f"Updated status for paper ID: {paper_id}")
-
-
-def list_papers(status_filter=None):
-    """
-    List papers, optionally filtering by progress status.
-    Supports aliases: 'ns' for not started, 'ip' for in progress, and 'd' for read.
-    Also displays the current page if set.
-    """
-    if status_filter:
-        status_filter = STATUS_ALIASES.get(status_filter.lower(), status_filter).lower()
-    papers = load_papers()
-    count = 0
-    for paper in papers:
-        status = paper.get("progress", {}).get("status", "not started")
-        if status_filter and status.lower() != status_filter:
-            continue
-        count += 1
-        print(f"ID: {paper.get('id')}")
-        print(f"Title: {paper.get('title')}")
-        if "parent_title" in paper:
-            print(f"  (Related to: {paper.get('parent_title')})")
-        print(f"  Status: {status}")
-        print(f"  Start Date: {paper.get('progress', {}).get('start_date')}")
-        print(f"  Finished Date: {paper.get('progress', {}).get('finished_date')}")
-        print(f"  Current Page: {paper.get('progress', {}).get('current_page')}")
-        print("-" * 60)
-    if count == 0:
-        print("No papers found with the specified filter.")
-
+# ---- download --------------------------------------------------------------
 
 def fetch_pdf(link, timeout=30):
-    """
-    GET the PDF at `link` with browser-like headers. Two attempts: first with
-    the link itself as Referer, then with a Google Referer (some hosts require
-    a referring page). Returns the raw bytes on success, raises RuntimeError on
-    failure. Mirrors the retry logic of download_papers.sh (curl-referer then
-    curl-google-referer) without shelling out.
-    """
-    last_err = "unknown"
+    """GET the PDF with browser headers + a referer fallback (link-as-referer,
+    then google-as-referer) so hosts that block hotlinking still work. Raises
+    RuntimeError on failure."""
+    last = "unknown"
     for referer in (link, "https://www.google.com/"):
         try:
             resp = requests.get(link, headers={**PDF_HEADERS, "Referer": referer},
                                 timeout=timeout, stream=True)
             if resp.ok:
                 return resp.content
-            last_err = f"HTTP {resp.status_code}"
+            last = f"HTTP {resp.status_code}"
         except requests.RequestException as e:
-            last_err = f"{type(e).__name__}: {e}"
-    raise RuntimeError(last_err)
+            last = f"{type(e).__name__}: {e}"
+    raise RuntimeError(last)
 
 
 def _is_pdf(data):
-    """True if the bytes start with the PDF magic. Catches HTML login-wall pages."""
     return data[:4] == b'%PDF'
 
 
-def download_one(paper, jobs_label=""):
-    """
-    Download a single paper dict (with topics/title/link) into
-    papers/<topic>/<title>.pdf. Skip if already present. Returns a result
-    tuple: (topic_slug, title_slug, title, link, status, dest, reason).
-    status in {"ok","skip","warn","fail"}.
-    """
+def download_one(paper):
+    """Download one paper dict -> papers/<topic>/<title>.pdf. Skip if present.
+    Returns (topic_slug, title_slug, title, link, status, dest, reason) where
+    status is ok | skip | warn | fail."""
     title = paper.get("title", "untitled")
     link = paper.get("link")
     if not link:
         return ("", "", title, "", "fail", "", "no link")
-    topics = paper.get("topics") or ["Uncategorized"]
-    topic_slug = sanitize_filename(topics[0])
+    topic_slug = sanitize_filename((paper.get("topics") or ["Uncategorized"])[0])
     title_slug = sanitize_filename(title)
     topic_dir = os.path.join(DOWNLOAD_DIR, topic_slug)
     os.makedirs(topic_dir, exist_ok=True)
     dest = os.path.join(topic_dir, title_slug + ".pdf")
-
     if os.path.exists(dest):
         return (topic_slug, title_slug, title, link, "skip", dest, "already downloaded")
-
     try:
         data = fetch_pdf(link)
     except Exception as e:
         return (topic_slug, title_slug, title, link, "fail", dest, str(e))
-
     if not _is_pdf(data):
         return (topic_slug, title_slug, title, link, "warn", dest,
                 "response was not a PDF (likely an HTML login/interstitial page)")
-
     with open(dest, "wb") as f:
         f.write(data)
     return (topic_slug, title_slug, title, link, "ok", dest, "")
 
 
 def download_all(jobs=6):
-    """
-    Bulk-download every PDF in papers.yml (including related papers) into
-    papers/<topic>/<title>.pdf, organized by the paper's first topic. Dedupes
-    by link, skips already-downloaded files, retries with a referer trick, and
-    writes papers/index.md + papers/failed.md at the end. Replaces
-    download_papers.sh.
-    """
-    if not os.path.exists(PAPERS_FILE):
-        print(f"{PAPERS_FILE} not found.")
-        return
-
-    with open(PAPERS_FILE, "r") as f:
-        papers = yaml.safe_load(f)
-    flat = flatten_with_topics(papers)
-
-    # Dedupe by link (same paper can appear as related to several parents).
-    seen = set()
-    queue = []
+    """Bulk-download every PDF in papers.yml into papers/<topic>/<title>.pdf.
+    Dedupes by link, skips files already on disk, writes papers/index.md and
+    papers/failed.md. Resumable (re-running is cheap)."""
+    with open(PAPERS_FILE) as f:
+        flat = flatten_with_topics(yaml.safe_load(f))
+    seen, queue = set(), []
     for p in flat:
         link = p.get("link")
         if not link or link in seen:
             continue
         seen.add(link)
         queue.append(p)
-
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     total = len(queue)
     print(f"Downloading {total} papers into {DOWNLOAD_DIR}/<topic>/ ({jobs} parallel)...")
-
     results = []
     markers = {"ok": "OK  ", "skip": "skip", "warn": "WARN", "fail": "FAIL"}
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as ex:
         futs = {ex.submit(download_one, p): p for p in queue}
-        done = 0
-        for fut in concurrent.futures.as_completed(futs):
-            done += 1
+        for i, fut in enumerate(concurrent.futures.as_completed(futs), 1):
             res = fut.result()
             results.append(res)
             topic_slug, title_slug, title, link, status, dest, reason = res
-            print(f"[{done}/{total}] {markers[status]} {title}")
+            print(f"[{i}/{total}] {markers[status]} {title}")
             if reason and status in ("warn", "fail"):
                 print(f"        -> {reason}")
-
-    _write_download_indexes(results)
-    n_ok = sum(1 for r in results if r[4] == "ok")
-    n_skip = sum(1 for r in results if r[4] == "skip")
-    n_warn = sum(1 for r in results if r[4] == "warn")
-    n_fail = sum(1 for r in results if r[4] == "fail")
-    print(f"\nDone: {n_ok} downloaded, {n_skip} already present, {n_warn} not-PDF, {n_fail} failed.")
+    _write_index(results)
+    n = lambda s: sum(1 for r in results if r[4] == s)
+    print(f"\nDone: {n('ok')} downloaded, {n('skip')} already present, "
+          f"{n('warn')} not-PDF, {n('fail')} failed.")
     print(f"Index: {DOWNLOAD_DIR}/index.md   Failures: {DOWNLOAD_DIR}/failed.md")
 
 
-def _write_download_indexes(results):
-    """Write papers/index.md (successes) and papers/failed.md (warns + fails).."""
-    index_path = os.path.join(DOWNLOAD_DIR, "index.md")
-    failed_path = os.path.join(DOWNLOAD_DIR, "failed.md")
-
+def _write_index(results):
     successes = sorted((r for r in results if r[4] in ("ok", "skip")),
                        key=lambda r: (r[0], r[1]))
-    with open(index_path, "w") as f:
+    with open(os.path.join(DOWNLOAD_DIR, "index.md"), "w") as f:
         f.write("# Downloaded Papers\n\n")
         current = ""
         for topic_slug, title_slug, title, link, status, dest, reason in successes:
@@ -380,12 +146,10 @@ def _write_download_indexes(results):
                     f.write("\n")
                 f.write(f"## {topic_slug}\n\n")
                 current = topic_slug
-            rel = os.path.relpath(dest, DOWNLOAD_DIR)
-            f.write(f"- [{title}]({rel})\n")
-
-    failures = [r for r in results if r[4] in ("warn", "fail")]
-    with open(failed_path, "w") as f:
+            f.write(f"- [{title}]({os.path.relpath(dest, DOWNLOAD_DIR)})\n")
+    with open(os.path.join(DOWNLOAD_DIR, "failed.md"), "w") as f:
         f.write("# Failed Downloads (manual)\n\n")
+        failures = [r for r in results if r[4] in ("warn", "fail")]
         if not failures:
             f.write("None -- every download succeeded.\n")
         for topic_slug, title_slug, title, link, status, dest, reason in failures:
@@ -395,39 +159,11 @@ def _write_download_indexes(results):
             f.write(f"  - Reason: {reason}\n\n")
 
 
-def download_paper(paper_id):
-    """
-    Download the PDF for a single paper by its progress-file ID, saving it to
-    the current directory as <sanitized-title>.pdf.
-    """
-    papers = load_papers()
-    paper = next((p for p in papers if p.get("id") == paper_id), None)
-    if paper is None:
-        print(f"Paper with ID '{paper_id}' not found.")
-        return
-    link = paper.get("link")
-    if not link:
-        print("No link found for this paper.")
-        return
-    title = paper.get("title", f"paper_{paper_id}")
-    filename = sanitize_filename(title) + ".pdf"
-    print(f"Downloading '{title}' from {link} ...")
-    try:
-        data = fetch_pdf(link)
-        if not _is_pdf(data):
-            print(f"Error: response from {link} was not a PDF (likely an HTML page).")
-            return
-        with open(filename, "wb") as f:
-            f.write(data)
-        print(f"Downloaded and saved to {filename}")
-    except Exception as e:
-        print(f"Error downloading paper: {e}")
+# ---- open ------------------------------------------------------------------
 
-
-def _collect_failed_urls(failed_path):
+def _failed_urls(failed_path):
     """Parse papers/failed.md -> list of (title, url) pairs."""
     if not os.path.exists(failed_path):
-        print(f"{failed_path} not found -- run './papers-cli download' first to generate it.")
         return []
     titles = []
     for line in open(failed_path):
@@ -438,19 +174,15 @@ def _collect_failed_urls(failed_path):
         m = re.match(r"^\s*- URL: <(.+?)>", line)
         if m:
             titles.append(m.group(1))
-    # titles alternates: title, url, title, url, ...
     return list(zip(titles[0::2], titles[1::2]))
 
 
-def _collect_all_links():
-    """Read papers.yml (flattened, deduped by link) -> list of (title, url) pairs."""
-    if not os.path.exists(PAPERS_FILE):
-        print(f"{PAPERS_FILE} not found.")
-        return []
+def _all_links():
+    """Every (title, link) from papers.yml, flattened and deduped."""
     with open(PAPERS_FILE) as f:
-        papers = flatten_with_topics(yaml.safe_load(f))
+        flat = flatten_with_topics(yaml.safe_load(f))
     seen, pairs = set(), []
-    for p in papers:
+    for p in flat:
         link = p.get("link")
         if not link or link in seen:
             continue
@@ -460,172 +192,112 @@ def _collect_all_links():
 
 
 def _open_urls(pairs, batch, pause, dry_run, label):
-    """Open a list of (title, url) pairs in the default browser, throttled."""
     if not pairs:
         print(f"No {label} to open.")
-        return []
+        return
     print(f"Opening {len(pairs)} {label}{'s' if len(pairs)!=1 else ''} in your browser...")
     if dry_run:
         for t, u in pairs:
             print(f"  [dry-run] {t}  ->  {u}")
-        return [u for _, u in pairs]
-    opened = []
+        return
+    opened = 0
     for i, (title, url) in enumerate(pairs, 1):
         print(f"  [{i}/{len(pairs)}] {title}")
         try:
             webbrowser.open(url, new=1, autoraise=True)
-            opened.append(url)
+            opened += 1
         except Exception as e:
             print(f"    -> couldn't open: {e}")
-        # Throttle: ACM/Cloudflare rate-limits and browsers choke opening 40+ tabs
-        # at once, so pause briefly between batches.
         if i % batch == 0 and i < len(pairs):
-            print(f"    (batch {i // batch} opened; pausing {pause}s before the next...)")
+            print(f"    (batch {i // batch} opened; pausing {pause}s...)")
             time.sleep(pause)
-    print(f"\nOpened {len(opened)} URLs.")
-    print("Each PDF renders in-browser; save it (Ctrl+S -> Save as PDF) into "
-          "papers/<topic>/ if you want it on disk, or just read it online.")
-    return opened
-
-
-def open_target(target, failed_path=None, batch=8, pause=1.5, dry_run=False, topic=None):
-    """
-    General 'open' command. Targets:
-      - failed     : URLs from papers/failed.md (solve Cloudflare/login challenges in a real browser)
-      - all        : every paper link URL from papers.yml
-      - downloaded : the papers/ folder (or a single topic subdir with --topic) in your file manager
-                   so you can browse the PDFs already on disk
-    """
-    if target == "failed":
-        path = failed_path or os.path.join(DOWNLOAD_DIR, "failed.md")
-        pairs = _collect_failed_urls(path)
-        if not pairs:
-            print(f"No failed URLs recorded in {path}.")
-            return []
-        return _open_urls(pairs, batch, pause, dry_run, "failed-download URL")
-
-    if target == "all":
-        pairs = _collect_all_links()
-        if not pairs:
-            print(f"No links found in {PAPERS_FILE}.")
-            return []
-        return _open_urls(pairs, batch, pause, dry_run, "paper URL")
-
-    if target == "downloaded":
-        if not os.path.isdir(DOWNLOAD_DIR):
-            print(f"{DOWNLOAD_DIR}/ not found -- run './papers-cli download' first.")
-            return []
-        target_dir = os.path.join(DOWNLOAD_DIR, topic) if topic else DOWNLOAD_DIR
-        if not os.path.isdir(target_dir):
-            print(f"{target_dir} not found.")
-            return []
-        count = sum(1 for _ in _iter_pdfs(target_dir))
-        if dry_run:
-            print(f"[dry-run] would open {target_dir} ({count} PDF{'s' if count!=1 else ''} inside)")
-            return [target_dir]
-        print(f"Opening {target_dir} ({count} PDF{'s' if count!=1 else ''} inside) in your file manager...")
-        try:
-            # webbrowser.open on a local path -> xdg-open -> default file manager.
-            webbrowser.open(f"file://{os.path.abspath(target_dir)}")
-        except Exception as e:
-            print(f"    -> couldn't open: {e}")
-            return []
-        print("Tip: to open a single PDF, just double-click it in your file manager, "
-              "or run 'xdg-open papers/<topic>/<title>.pdf'.")
-        return [target_dir]
-
-    print(f"Unknown open target {target!r}. Use: failed, all, or downloaded.")
-    return []
+    print(f"\nOpened {opened} URLs.")
 
 
 def _iter_pdfs(root):
-    """Yield every *.pdf under root (recursive)."""
     for dirpath, _dirs, files in os.walk(root):
         for name in sorted(files):
             if name.lower().endswith(".pdf"):
                 yield os.path.join(dirpath, name)
 
 
+def open_target(target, failed_path=None, batch=8, pause=1.5, dry_run=False, topic=None):
+    """
+    open failed     -> papers/failed.md URLs in your browser (batched; the way
+                       to get ACM/Cloudflare-gated papers a CLI can't fetch)
+    open all         -> every paper link URL from papers.yml (batched)
+    open downloaded  -> the papers/ folder (or one --topic subdir) in your file
+                       manager
+    """
+    if target == "failed":
+        path = failed_path or os.path.join(DOWNLOAD_DIR, "failed.md")
+        pairs = _failed_urls(path)
+        if not pairs:
+            print(f"No failed URLs recorded in {path}.")
+            print("Run './papers-cli download' first to generate it.")
+            return
+        _open_urls(pairs, batch, pause, dry_run, "failed-download URL")
+
+    elif target == "all":
+        pairs = _all_links()
+        if not pairs:
+            print(f"No links found in {PAPERS_FILE}.")
+            return
+        _open_urls(pairs, batch, pause, dry_run, "paper URL")
+
+    elif target == "downloaded":
+        if not os.path.isdir(DOWNLOAD_DIR):
+            print(f"{DOWNLOAD_DIR}/ not found -- run './papers-cli download' first.")
+            return
+        target_dir = os.path.join(DOWNLOAD_DIR, topic) if topic else DOWNLOAD_DIR
+        if not os.path.isdir(target_dir):
+            print(f"{target_dir} not found.")
+            return
+        count = sum(1 for _ in _iter_pdfs(target_dir))
+        if dry_run:
+            print(f"[dry-run] would open {target_dir} ({count} PDF{'s' if count!=1 else ''} inside)")
+            return
+        print(f"Opening {target_dir} ({count} PDF{'s' if count!=1 else ''} inside) in your file manager...")
+        webbrowser.open(f"file://{os.path.abspath(target_dir)}")
+        print("To open a single PDF: xdg-open papers/<topic>/<title>.pdf")
+
+
+# ---- main ------------------------------------------------------------------
+
 def main():
-    parser = argparse.ArgumentParser(description="CLI for managing paper reading progress and downloading PDFs")
-    subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
+    parser = argparse.ArgumentParser(
+        prog="papers-cli",
+        description="Download and open the academic papers in papers.yml")
+    sub = parser.add_subparsers(dest="command", help="Sub-commands")
 
-    parser_init = subparsers.add_parser("init", help="Initialize papers_progress.yml from papers.yml")
+    pd = sub.add_parser("download",
+                        help="Bulk-download every PDF into papers/<topic>/<title>.pdf")
+    pd.add_argument("--jobs", "-j", type=int, default=6,
+                    help="Parallel workers (default: 6)")
 
-    parser_reset = subparsers.add_parser("reset", help="Reset progress on all papers to 'not started'")
-
-    parser_set = subparsers.add_parser("set", help="Set the status for a paper by ID")
-    parser_set.add_argument("--id", required=True, type=int, help="ID of the paper to update")
-    parser_set.add_argument("--status", required=True, help="Status to set (not started/ns, in progress/ip, read/d)")
-    parser_set.add_argument("--start_date", help="Start date (YYYY-MM-DD) for 'in progress' or 'read'")
-    parser_set.add_argument("--finished_date", help="Finished date (YYYY-MM-DD) for 'read'")
-    parser_set.add_argument("--page", help="Current page number", type=int)
-
-    parser_list = subparsers.add_parser("list", help="List papers by progress status")
-    parser_list.add_argument("--status", help="Filter by status (not started/ns, in progress/ip, read/d)")
-
-    # download: one paper by ID, or all papers (bulk).
-    parser_download = subparsers.add_parser(
-        "download",
-        help="Download PDFs: 'download all' (bulk, into papers/<topic>/) or 'download <id>' (one, into cwd)")
-    parser_download.add_argument(
-        "target", nargs="?", default="all",
-        help="'all' (default) to bulk-download every paper into papers/<topic>/, "
-             "or a paper ID to download one paper to the current directory")
-    parser_download.add_argument(
-        "--id", type=int,
-        help="Paper ID to download (alternative to the positional target). "
-             "Downloaded to the current directory as <title>.pdf")
-    parser_download.add_argument(
-        "--jobs", "-j", type=int, default=6,
-        help="Parallel workers for 'download all' (default: 6)")
-
-    # open: open URLs/files in the browser or file manager.
-    parser_open = subparsers.add_parser(
-        "open",
-        help="Open URLs or downloaded PDFs: 'open failed', 'open all', 'open downloaded'")
-    parser_open.add_argument(
-        "target", nargs="?", default="failed",
-        choices=["failed", "all", "downloaded"],
-        help="'failed' (default) opens failed.md URLs in your browser; "
-             "'all' opens every paper link URL from papers.yml; "
-             "'downloaded' opens the papers/ folder in your file manager")
-    parser_open.add_argument(
-        "--file", default=None,
-        help=f"Path to a failed.md (only with 'open failed'; default: {DOWNLOAD_DIR}/failed.md)")
-    parser_open.add_argument(
-        "--topic", default=None,
-        help="With 'open downloaded', open just this topic subdir (e.g. 'Computer_History')")
-    parser_open.add_argument(
-        "--batch", type=int, default=8,
-        help="Open this many tabs per batch, then pause briefly (default: 8)")
-    parser_open.add_argument(
-        "--pause", type=float, default=1.5,
-        help="Seconds to pause between batches (default: 1.5)")
-    parser_open.add_argument(
-        "--dry-run", action="store_true",
-        help="Just list what would be opened, don't launch anything")
+    po = sub.add_parser("open",
+                        help="open {failed,all,downloaded} -- launch in your "
+                             "browser/file manager")
+    po.add_argument("target", nargs="?", default="failed",
+                    choices=["failed", "all", "downloaded"],
+                    help="'failed' (default) opens failed.md URLs in your browser; "
+                         "'all' opens every paper link URL from papers.yml; "
+                         "'downloaded' opens the papers/ folder in your file manager")
+    po.add_argument("--file", default=None,
+                    help=f"Path to a failed.md (only with 'open failed'; default: {DOWNLOAD_DIR}/failed.md)")
+    po.add_argument("--topic", default=None,
+                    help="With 'open downloaded', open just this topic subdir")
+    po.add_argument("--batch", type=int, default=8,
+                    help="Open this many tabs per batch, then pause briefly (default: 8)")
+    po.add_argument("--pause", type=float, default=1.5,
+                    help="Seconds to pause between batches (default: 1.5)")
+    po.add_argument("--dry-run", action="store_true",
+                    help="Just list what would be opened, don't launch anything")
 
     args = parser.parse_args()
 
-    if args.command == "init":
-        init_papers()
-    elif args.command == "reset":
-        reset_papers()
-    elif args.command == "set":
-        set_paper_status(args.id, args.status, args.start_date, args.finished_date, args.page)
-    elif args.command == "list":
-        list_papers(args.status)
-    elif args.command == "download":
-        if args.id is not None:
-            download_paper(args.id)
-        elif str(args.target).lower() == "all":
-            download_all(args.jobs)
-        else:
-            try:
-                download_paper(int(args.target))
-            except ValueError:
-                parser_download.error(f"download target must be 'all' or a paper ID, got {args.target!r}")
+    if args.command == "download":
+        download_all(args.jobs)
     elif args.command == "open":
         open_target(args.target, args.file, args.batch, args.pause, args.dry_run, args.topic)
     else:
